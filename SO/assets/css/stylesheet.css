@@ -1,4 +1,16 @@
-*{
-	margin: 0;
-	padding: 0;
+.my-main-card {
+	position: relative;
+}
+
+.my-progress-bar {
+	display: none;
+	border-radius: 0; 
+	left: 0;
+	margin: 0; 
+	position: absolute; 
+	top: 0;
+}
+
+.my-no-m-b {
+	margin-bottom: 0 !important;
 }

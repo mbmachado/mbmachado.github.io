@@ -2,18 +2,99 @@
 <html lang="pt-BR">
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	<title>Escalonador de Processos</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 	<link rel="stylesheet" href="assets/vendor/materialize/css/materialize.min.css">
 	<link rel="stylesheet" href="assets/css/stylesheet.css">
 	<link rel="icon" href="assets/img/favicon.png">
 	<link rel="manifest" href="manifest.json">
 </head>
-<body>
-	
+<body class="blue-grey lighten-5">
+	<div class="row my-no-m-b">
+		<div class="col s12 m3 l3 teal lighten-2">
+			<div class="row">
+				<div class="col s12">
+					<h5 class="center-align blue-grey-text text-lighten-5">Escalonador de Processos</h5>
+					<p class="center-align blue-grey-text text-lighten-5">By Enrique W., Mateus B. e Mateus C.</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col s12">
+					<div class="card-panel my-main-card">
+						<div id="progress_bar" class="progress my-progress-bar indigo lighten-4">
+						    <div class="indeterminate indigo darken-2"></div>
+						</div>
+						<form id="main_form" action="#" method="POST">
+							<div class="row">
+								<div class="input-field col s12">
+						        	<input id="process_number" type="text" class="1-to-5" autocomplete="off">
+						        	<label for="process_number">Número de Processos</label>
+						        </div>
+							</div>
+							<div class="row">
+								<div class="input-field col s12">
+						        	<input id="quamtum_number" type="text" class="1-to-9" autocomplete="off">
+						        	<label for="quamtum_number">Quamtum</label>
+						        </div>
+							</div>
+							<div class="row">
+								<div class="input-field col s12">
+						        	<input id="overload_number" type="text" class="0-to-9" autocomplete="off">
+						        	<label for="overload_number">Sobrecarga</label>
+						        </div>
+							</div>
+							<div class="row">
+								<div class="col s12">
+									<p>
+										<label>
+											<input class="with-gap" name="algorithm" value="FIFO" type="radio" checked/>
+											<span>FIFO</span>
+										</label>
+									</p>
+									<p>
+										<label>
+											<input class="with-gap" name="algorithm" value="SJF" type="radio"/>
+											<span>SJF</span>
+										</label>
+									</p>
+									<p>
+										<label>
+											<input class="with-gap" name="algorithm" value="RR" type="radio"/>
+											<span>Round Robin</span>
+										</label>
+									</p>
+									<p>
+										<label>
+											<input class="with-gap" name="algorithm" value="EDF" type="radio"/>
+											<span>EDF</span>
+										</label>
+									</p>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col s4">
+									<button class="btn waves-effect waves-light" type="submit" name="action">Iniciar</button>
+								</div>
+								<div class="col s4">
+									<button id="reset_btn" class="btn waves-effect waves-light blue-grey lighten-4  blue-grey-text text-darken-4" type="reset">Limpar</button>
+								</div>
+								<div class="col s4">
+									
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
 
+		<div class="col s12 m9 l9 blue-grey lighten-5">
+			<div id="processes_info_box" class="row"></div>
+			<div id="graphs_box" class="row"></div>
+		</div>
 
-
-
+    </div>
 	<script src="assets/vendor/jQuery/jquery-3.3.1.min.js"></script>
 	<script src="assets/vendor/velocity/velocity.min.js"></script>
 	<script src="assets/vendor/jQuery-Mask-Plugin/dist/jquery.mask.min.js"></script>
@@ -21,7 +102,102 @@
 	<script src="assets/js/script.js"></script>
 	<script>
 		"use strict";
-		window.alert("Em desenvolvimento");
+		var mainForm = $("#main_form");
+		var processNumberInput = $("#process_number");
+		var quamtumNumberInput = $("#quamtum_number");
+		var overloadNumberInput = $("#overload_number"); 
+		var algorithmInput = $("input[name=algorithm]:checked", "#main_form");
+		var resetButton = $("#reset_btn");
+		var progress_bar = $("#progress_bar");
+
+		var processesInfoBox = $("#processes_info_box");
+		var graphsBox = $("#graphs_box");
+		
+		processNumberInput.on('change', function(event) {
+			event.preventDefault();
+			processesInfoBox.empty();
+			let n = parseInt(processNumberInput.val());
+			for (let i = 0; i < n; i++) {
+				processesInfoBox.append(
+					'<div class="col s12 m3">\
+						<div class="card">\
+					        <div class="card-content">\
+					        	<span class="card-title">Processo '+i+'</span>\
+					        	<div class="row">\
+							        <div class="input-field col s6">\
+							        	<input id="process_'+i+'_start" type="text" class="0-to-99" autocomplete="off">\
+							        	<label for="process_'+i+'_start">Chegada</label>\
+							        </div>\
+									<div class="input-field col s6">\
+							        	<input id="process_'+i+'_time" type="text" class="0-to-99" autocomplete="off">\
+							        	<label for="process_'+i+'_time">Tempo</label>\
+							        </div>\
+								</div>\
+								<div class="row">\
+							        <div class="input-field col s6">\
+							        	<input id="process_'+i+'_deadline" type="text" class="0-to-99" autocomplete="off">\
+							        	<label for="process_'+i+'_deadline">Deadline</label>\
+							        </div>\
+									<div class="input-field col s6">\
+							        	<input id="process_'+i+'_priority" type="text" class="0-to-99" autocomplete="off">\
+							        	<label for="process_'+i+'_priority">Prioridade</label>\
+							        </div>\
+								</div>\
+					        </div>\
+					    </div>\
+				    </div>'
+				);
+			}
+			$('.0-to-99').mask('00');
+		});
+
+		mainForm.on('submit', function(event) {
+			event.preventDefault();
+			if(!(processNumberInput.val()).length) {
+				window.alert("Número de processos não pode ser nulo!");
+			} else if (!(quamtumNumberInput.val()).length) {
+				window.alert("Quamtum não pode ser nulo!");
+			} else if (!(overloadNumberInput.val()).length) {
+				window.alert("Sobrecarga não pode ser nulo!");
+			} else {
+				let n = parseInt(processNumberInput.val()), errorMsg = "";
+				for (var i = 0; i < n; i++) {
+					if(!($("#process_"+i+"_start").val()).length || !($("#process_"+i+"_time").val()).length || !($("#process_"+i+"_deadline").val()).length || !($("#process_"+i+"_priority").val()).length) {
+						console.log("lalalala");
+						errorMsg += "Dados do processo "+i+" estão incompletos!\n";
+					}
+				}
+				if(!(errorMsg).length) {
+					$("html").animate({scrollTop:0}, 500);
+					progress_bar.show('fast');
+				} else {
+					window.alert(errorMsg);
+				}
+			}
+		});
+
+		resetButton.on('click', function(event) {
+			processesInfoBox.empty();
+		});
+
+		$(document).ready(function(){
+			$('.0-to-9').mask('9');
+			$('.1-to-9').mask('n', {
+			    translation: {
+			      	'n': {
+			    		pattern: /[1-9]/
+			    	}
+			    }
+			});
+			$('.1-to-5').mask('n', {
+			    translation: {
+			      	'n': {
+			    		pattern: /[1-5]/
+			    	}
+			    }
+			});
+		});
+
 	</script>
 </body>
 </html>
