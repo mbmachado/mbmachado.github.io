@@ -13,7 +13,7 @@
 <body class="blue-grey lighten-5">
 	<div class="row my-no-m-b">
 		<div class="col s12 m3 l3 teal lighten-2">
-			<div class="row">
+			<div class="row my-no-m-b">
 				<div class="col s12">
 					<h5 class="center-align blue-grey-text text-lighten-5">Escalonador de Processos</h5>
 					<p class="center-align blue-grey-text text-lighten-5">By Enrique W., Mateus B. e Mateus C.</p>
@@ -25,6 +25,7 @@
 						<div id="progress_bar" class="progress my-progress-bar indigo lighten-4">
 						    <div class="indeterminate indigo darken-2"></div>
 						</div>
+						<div id="overlay_panel" class="my-overlay"></div>
 						<form id="main_form" action="#" method="POST">
 							<div class="row">
 								<div class="input-field col s12">
@@ -33,19 +34,27 @@
 						        </div>
 							</div>
 							<div class="row">
-								<div class="input-field col s12">
+								<div class="input-field col s6">
 						        	<input id="quamtum_number" type="text" class="1-to-9" autocomplete="off">
 						        	<label for="quamtum_number">Quamtum</label>
 						        </div>
-							</div>
-							<div class="row">
-								<div class="input-field col s12">
+						        <div class="input-field col s6">
 						        	<input id="overload_number" type="text" class="0-to-9" autocomplete="off">
 						        	<label for="overload_number">Sobrecarga</label>
 						        </div>
 							</div>
 							<div class="row">
+								<div class="input-field col s12">
+									<select>
+										<option value="FIFO" selected>FIFO</option>
+										<option value="LRU">Menos recentemente utilizado</option>
+									</select>
+									<label>Substituição de Páginas</label>
+								</div>
+							</div>
+							<div class="row">
 								<div class="col s12">
+									<label>Algoritmo de escalonamento</label>
 									<p>
 										<label>
 											<input class="with-gap" name="algorithm" value="FIFO" type="radio" checked/>
@@ -88,7 +97,28 @@
 
 		<div class="col s12 m9 l9 blue-grey lighten-5">
 			<div id="processes_info_box" class="row"></div>
-			<div id="graphs_box" class="row"></div>
+			<div id="graphs_box" class="row">
+				<div class="col s12">
+					<div class="card-panel">
+						<h6>Gráfico de Gantt</h6>
+					</div>
+				</div>
+				<div class="col s12 m4">
+					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
+						<h6>Memória RAM</h6>
+					</div>
+				</div>
+				<div class="col s12 m4">
+					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
+						<h6>Disco</h6>
+					</div>
+				</div>
+				<div class="col s12 m4">
+					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
+						<h6>Tabela de Páginas</h6>
+					</div>
+				</div>
+			</div>
 		</div>
 
     </div>
@@ -105,7 +135,8 @@
 		var overloadNumberInput = $("#overload_number"); 
 		var algorithmInput = $("input[name=algorithm]:checked", "#main_form");
 		var resetButton = $("#reset_btn");
-		var progress_bar = $("#progress_bar");
+		var progressBar = $("#progress_bar");
+		var overlayPanel = $("#overlay_panel");
 
 		var processesInfoBox = $("#processes_info_box");
 		var graphsBox = $("#graphs_box");
@@ -146,37 +177,49 @@
 				);
 			}
 			$('.0-to-99').mask('00');
+			graphsBox.hide(0, function() {
+				processesInfoBox.show('fast');
+			});
 		});
 
 		mainForm.on('submit', function(event) {
 			event.preventDefault();
+			let n = parseInt(processNumberInput.val()), errorMsg = "";
 			if(!(processNumberInput.val()).length) {
-				window.alert("Número de processos não pode ser nulo!");
-			} else if (!(quamtumNumberInput.val()).length) {
-				window.alert("Quamtum não pode ser nulo!");
-			} else if (!(overloadNumberInput.val()).length) {
-				window.alert("Sobrecarga não pode ser nulo!");
+				errorMsg += "Número de processos não pode ser nulo!\n";
 			} else {
-				let n = parseInt(processNumberInput.val()), errorMsg = "";
 				for (var i = 0; i < n; i++) {
 					if(!($("#process_"+i+"_start").val()).length || !($("#process_"+i+"_time").val()).length || !($("#process_"+i+"_deadline").val()).length || !($("#process_"+i+"_priority").val()).length) {
 						errorMsg += "Dados do processo "+i+" estão incompletos!\n";
 					}
 				}
-				if(!(errorMsg).length) {
-					$("html").animate({scrollTop:0}, 500);
-					progress_bar.show('fast');
-				} else {
-					window.alert(errorMsg);
-				}
+			}
+			if (!(quamtumNumberInput.val()).length) {
+				errorMsg += "Quamtum não pode ser nulo!\n";
+			}  
+			if (!(overloadNumberInput.val()).length) {
+				errorMsg += "Sobrecarga não pode ser nulo!\n";
+			}
+			if(!(errorMsg).length) {
+				$("html").animate({scrollTop:0}, 500);
+				processesInfoBox.hide(0, function(){
+					graphsBox.show('fast');
+					progressBar.show('fast');
+					overlayPanel.show('fast');
+				});
+			} else {
+				window.alert(errorMsg);
 			}
 		});
 
 		resetButton.on('click', function(event) {
 			processesInfoBox.empty();
+			processesInfoBox.hide('fast');
+			graphsBox.show('fast');
 		});
 
 		$(document).ready(function(){
+			$('select').formSelect();
 			$('.0-to-9').mask('9');
 			$('.1-to-9').mask('n', {
 			    translation: {
