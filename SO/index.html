@@ -45,7 +45,7 @@
 							</div>
 							<div class="row">
 								<div class="input-field col s12">
-									<select>
+									<select id="page_replacement">
 										<option value="FIFO" selected>FIFO</option>
 										<option value="LRU">Menos recentemente utilizado</option>
 									</select>
@@ -122,7 +122,7 @@
 								<div class="switch right-align my-switch">
 								    <label>
 								    	Rolagem automática
-								    	<input type="checkbox">
+								    	<input type="checkbox" checked>
 								    	<span class="lever my-lever"></span>
 								    </label>
 								</div>
@@ -167,11 +167,12 @@
 	<script src="assets/js/script.js"></script>
 	<script>
 		"use strict";
-
+		var data;
 		var mainForm = $("#main_form");
 		var processNumberInput = $("#process_number");
 		var quamtumNumberInput = $("#quamtum_number");
-		var overloadNumberInput = $("#overload_number"); 
+		var overloadNumberInput = $("#overload_number");
+		var pageReplacementInput = $("#page_replacement");
 		var algorithmInput = $("input[name=algorithm]:checked", "#main_form");
 		var resetButton = $("#reset_btn");
 		var progressBar = $("#progress_bar");
@@ -180,16 +181,35 @@
 		var processesInfoBox = $("#processes_info_box");
 		var graphsBox = $("#graphs_box");
 		var ganttGraph = $("#gantt_graph");
+		var visibleGanttGraphWidth = ganttGraph.width();
+		var progressGanttGraphWidth = 148;
+		var maxGanttGraphCol = 30;
+		var scrollPosition = 70;
+		var lastScrollDelay = 0;
 
 		var errorModal = $("#error_modal");
 		var modalContent = $("#modal_content");
-		var replayBtn = $("#replay_btn")
+		var replayBtn = $("#replay_btn");
 
 		var globalDelay = 0;
 		var green = "#4db6ac";
 		var red = "#e57373";
 		var grey = "90a4ae";
 		
+		function main() {
+			// Array "data" keeps the information. See the structure in the console
+			console.log(data);
+			
+			// Use makeProgressInGanttSquare(y, x [,color=optional]) function to fill the graph
+			// Example:
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+			for (let i = 0; i < 41; i++) {
+				let color = Math.floor((Math.random() * 3));
+				let y = Math.floor((Math.random() * 5));
+				makeProgressInGanttSquare(y, i, colors[color]);
+			} 
+		}
+
 		processNumberInput.on('change', function(event) {
 			event.preventDefault();
 			processesInfoBox.empty();
@@ -233,21 +253,33 @@
 
 		mainForm.on('submit', function(event) {
 			event.preventDefault();
-			let n = parseInt(processNumberInput.val()), errorMsg = "";
+			let n = parseInt(processNumberInput.val()), errorMsg = ""; data = [];
 			if(!(processNumberInput.val()).length) {
 				errorMsg += "Número de processos não pode ser nulo!<br>";
 			} else {
 				for (var i = 0; i < n; i++) {
 					if(!($("#process_"+i+"_start").val()).length || !($("#process_"+i+"_time").val()).length || !($("#process_"+i+"_deadline").val()).length || !($("#process_"+i+"_priority").val()).length) {
 						errorMsg += "Dados do processo "+i+" estão incompletos!<br>";
+					} else {
+						data[i] = {
+							"_start"    : parseInt($("#process_"+i+"_start").val()), 
+							"_time"     : parseInt($("#process_"+i+"_time").val()),
+							"_deadline" : parseInt($("#process_"+i+"_deadline").val()),
+							"_priority" : parseInt($("#process_"+i+"_priority").val())
+						};
 					}
 				}
+				data["processes"] = parseInt(processNumberInput.val());
 			}
 			if (!(quamtumNumberInput.val()).length) {
 				errorMsg += "Quamtum não pode ser nulo!<br>";
+			} else {
+				data["quantum"] = parseInt(quamtumNumberInput.val()); 
 			}  
 			if (!(overloadNumberInput.val()).length) {
 				errorMsg += "Sobrecarga não pode ser nulo!<br>";
+			} else {
+				data["overload"] = parseInt(overloadNumberInput.val()); 
 			}
 			if(!(errorMsg).length) {
 				$("html").animate({scrollTop:0}, 500);
@@ -256,6 +288,15 @@
 					progressBar.show('fast');
 					overlayPanel.show('fast');
 				});
+				data["algorithm"] = algorithmInput.val();
+				data["pageReplacement"] = pageReplacementInput.val();
+				for (var i = 0; i < n; i++) {
+					$("#gantt_inner_info_square_"+i+"_0 span").html(data[i]._start);
+					$("#gantt_inner_info_square_"+i+"_1 span").html(data[i]._time);
+					$("#gantt_inner_info_square_"+i+"_2 span").html(data[i]._deadline);
+					$("#gantt_inner_info_square_"+i+"_3 span").html(i);
+				}
+				main();
 			} else {
 				modalContent.html(errorMsg);
 				errorModal.modal('open');
@@ -292,11 +333,11 @@
 				ganttGraph.append('\
 					<div class="my-gantt-col">\
 						<div class="my-gantt-square"><span>'+d[i]+'</span></div>\
-						<div id="gantt_inner_info_square_4_'+i+'" class="my-gantt-square"></div>\
-						<div id="gantt_inner_info_square_3_'+i+'" class="my-gantt-square"></div>\
-						<div id="gantt_inner_info_square_2_'+i+'" class="my-gantt-square"></div>\
-						<div id="gantt_inner_info_square_1_'+i+'" class="my-gantt-square"></div>\
-						<div id="gantt_inner_info_square_0_'+i+'" class="my-gantt-square"></div>\
+						<div id="gantt_inner_info_square_4_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="gantt_inner_info_square_3_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="gantt_inner_info_square_2_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="gantt_inner_info_square_1_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="gantt_inner_info_square_0_'+i+'" class="my-gantt-square"><span></span></div>\
 					</div>\
 				');
 			}
@@ -315,18 +356,42 @@
 		});
 
 		function makeProgressInGanttSquare(y, x, color=green, _delay=(globalDelay+=600)) {
+			if(x == maxGanttGraphCol) {
+				let i = ++maxGanttGraphCol;
+				ganttGraph.append('\
+					<div class="my-gantt-col">\
+						<div class="my-gantt-square"><span>'+i+'</span></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_4_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_3_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_2_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_1_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
+					</div>\
+				');
+			}
+
 			let square = $("#gantt_inner_square_"+y+"_"+x);
 			square.css('background-color', color);
+			progressGanttGraphWidth += 37;
+
+			if(progressGanttGraphWidth >= visibleGanttGraphWidth) {
+				ganttGraph.delay(_delay - lastScrollDelay).animate({scrollLeft:scrollPosition}, 400);
+				lastScrollDelay = _delay;
+				scrollPosition += 70;
+			}
+
 			square.velocity({width: "100%"}, {duration:600, delay: _delay, mobileHA: false});
-			//square.delay(_delay).animate({width: "100%"}, 600);
+			/*Different approach*///square.delay(_delay).animate({width: "100%"}, 600);
 		}
 
 		replayBtn.on('click', function(event) {
 			event.preventDefault();
-			for (let i = 0; i < 30; i++) {
-				makeProgressInGanttSquare(0,i,red);
-			}
+			location.reload();
 		});		
+
+		$( window ).resize(function() {
+			visibleGanttGraphWidth = ganttGraph.width();
+		});
 
 	</script>
 </body>
