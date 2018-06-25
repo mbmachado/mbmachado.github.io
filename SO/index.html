@@ -94,13 +94,40 @@
 				</div>
 			</div>
 		</div>
-
 		<div class="col s12 m9 l9 blue-grey lighten-5">
 			<div id="processes_info_box" class="row"></div>
 			<div id="graphs_box" class="row">
 				<div class="col s12">
 					<div class="card-panel">
-						<h6>Gráfico de Gantt</h6>
+						<div class="row">
+							<div class="col s12">
+								<h6>Gráfico de Gantt</h6>
+							</div>
+						</div>
+						<div id="gantt_graph" class="my-gantt-graph"></div>
+						<div class="row">
+							<div class="col s6 m3 valign-wrapper">
+								<div class="my-subtitle-square teal lighten-2"></div>
+								<label>Executando</label>
+							</div>
+							<div class="col s6 m3 valign-wrapper">
+								<div class="my-subtitle-square  red lighten-2"></div>
+								<label>Sobrecarga</label>
+							</div>
+							<div class="col s6 m3 valign-wrapper">
+								<div class="my-subtitle-square blue-grey lighten-2"></div>
+								<label>Estouro DL</label>
+							</div>
+							<div class="col s6 m3">
+								<div class="switch right-align my-switch">
+								    <label>
+								    	Rolagem automática
+								    	<input type="checkbox">
+								    	<span class="lever my-lever"></span>
+								    </label>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="col s12 m4">
@@ -120,7 +147,9 @@
 				</div>
 			</div>
 		</div>
-
+    </div>
+    <div class="fixed-action-btn">
+    	<a id="replay_btn" href="#" class="btn-floating btn-large waves-effect waves-light pulse"><i class="material-icons">replay</i></a>
     </div>
     <div id="error_modal" class="modal">
 	    <div class="modal-content">
@@ -138,6 +167,7 @@
 	<script src="assets/js/script.js"></script>
 	<script>
 		"use strict";
+
 		var mainForm = $("#main_form");
 		var processNumberInput = $("#process_number");
 		var quamtumNumberInput = $("#quamtum_number");
@@ -149,9 +179,16 @@
 
 		var processesInfoBox = $("#processes_info_box");
 		var graphsBox = $("#graphs_box");
+		var ganttGraph = $("#gantt_graph");
 
 		var errorModal = $("#error_modal");
 		var modalContent = $("#modal_content");
+		var replayBtn = $("#replay_btn")
+
+		var globalDelay = 0;
+		var green = "#4db6ac";
+		var red = "#e57373";
+		var grey = "90a4ae";
 		
 		processNumberInput.on('change', function(event) {
 			event.preventDefault();
@@ -250,7 +287,46 @@
 			    	}
 			    }
 			});
+
+			for (let d = ['TC', 'TE', 'D', 'Nº'], i = 0; i < 4; i++) {
+				ganttGraph.append('\
+					<div class="my-gantt-col">\
+						<div class="my-gantt-square"><span>'+d[i]+'</span></div>\
+						<div id="gantt_inner_info_square_4_'+i+'" class="my-gantt-square"></div>\
+						<div id="gantt_inner_info_square_3_'+i+'" class="my-gantt-square"></div>\
+						<div id="gantt_inner_info_square_2_'+i+'" class="my-gantt-square"></div>\
+						<div id="gantt_inner_info_square_1_'+i+'" class="my-gantt-square"></div>\
+						<div id="gantt_inner_info_square_0_'+i+'" class="my-gantt-square"></div>\
+					</div>\
+				');
+			}
+			for (let i = 0; i < 31; i++) {
+				ganttGraph.append('\
+					<div class="my-gantt-col">\
+						<div class="my-gantt-square"><span>'+i+'</span></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_4_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_3_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_2_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_1_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
+					</div>\
+				');
+			}
 		});
+
+		function makeProgressInGanttSquare(y, x, color=green, _delay=(globalDelay+=600)) {
+			let square = $("#gantt_inner_square_"+y+"_"+x);
+			square.css('background-color', color);
+			square.velocity({width: "100%"}, {duration:600, delay: _delay, mobileHA: false});
+			//square.delay(_delay).animate({width: "100%"}, 600);
+		}
+
+		replayBtn.on('click', function(event) {
+			event.preventDefault();
+			for (let i = 0; i < 30; i++) {
+				makeProgressInGanttSquare(0,i,red);
+			}
+		});		
 
 	</script>
 </body>
