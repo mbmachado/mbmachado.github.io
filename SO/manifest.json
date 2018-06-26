@@ -1,8 +1,8 @@
 {
   "name": "Escalonador de Processos",
   "short_name": "Escalonador",
-  "theme_color": "#EAEAEA",
-  "background_color": "#EAEAEA",
+  "theme_color": "#4db6ac",
+  "background_color": "#4db6ac",
   "display": "standalone",
   "orientation": "portrait",
   "Scope": "/",
