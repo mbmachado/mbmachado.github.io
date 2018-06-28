@@ -168,6 +168,7 @@
 	<script>
 		"use strict";
 		var data;
+		var sortData;
 		var mainForm = $("#main_form");
 		var processNumberInput = $("#process_number");
 		var quamtumNumberInput = $("#quamtum_number");
@@ -196,18 +197,27 @@
 		var red = "#e57373";
 		var grey = "90a4ae";
 		
+		function fifo(){
+			var ultimo=0;
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+			for(let i=0; i<sortData.length; i++){
+				if(ultimo<sortData[i]._start){
+					ultimo=sortData[i]._start;
+				}
+				for(let j=0; j<sortData[i]._time; j++){
+					makeProgressInGanttSquare(sortData[i]._processNumber, ultimo, colors[0]);
+					ultimo++;
+				}
+			}
+		}
+
 		function main() {
 			// Array "data" keeps the information. See the structure in the console
 			console.log(data);
 			
 			// Use makeProgressInGanttSquare(y, x [,color=optional]) function to fill the graph
 			// Example:
-			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
-			for (let i = 0; i < 41; i++) {
-				let color = Math.floor((Math.random() * 3));
-				let y = Math.floor((Math.random() * 5));
-				makeProgressInGanttSquare(y, i, colors[color]);
-			} 
+			//fifo(); 
 		}
 
 		processNumberInput.on('change', function(event) {
@@ -296,6 +306,7 @@
 					$("#gantt_inner_info_square_"+i+"_2 span").html(data[i]._deadline);
 					$("#gantt_inner_info_square_"+i+"_3 span").html(i);
 				}
+				sortByArrivalTime();
 				main();
 			} else {
 				modalContent.html(errorMsg);
@@ -354,6 +365,55 @@
 				');
 			}
 		});
+
+		function sortByArrivalTime() {
+			sortData = [];
+			var start;
+			var time;
+			var deadline;
+			var timeLeft;
+			var position;
+			var io = 0;
+			var processNumber;
+
+			for(let i = 0; i < data.length; i++){
+				sortData[i] = {
+							"_start"    : parseInt(data[i]._start), 
+							"_time"     : parseInt(data[i]._time),
+							"_deadline" : parseInt(data[i]._deadline),
+							"_priority" : parseInt(data[i]._priority),
+							"_timeLeft" : parseInt(data[i]._time),
+							"_processNumber" : parseInt(i),
+							"_makingIO" : parseInt(io)
+				};
+			}
+
+			for(let i = 0; i < sortData.length; i++){
+				position = i;
+				for(let j = i+1; j<sortData.length; j++){
+					if(sortData[position]._start > sortData[j]._start){
+						position = j;
+					}
+				}
+				if(position != i){
+					start = sortData[i]._start;
+					time = sortData[i]._time;
+					deadline = sortData[i]._deadline;
+					timeLeft = sortData[i]._timeLeft;
+					processNumber =  sortData[i]._processNumber;
+					sortData[i]._start = sortData[position]._start;
+					sortData[i]._time = sortData[position]._time;
+					sortData[i]._deadline = sortData[position]._deadline;
+					sortData[i]._timeLeft = sortData[position]._timeLeft;
+					sortData[i]._processNumber = sortData[position]._processNumber;
+					sortData[position]._start = start;
+					sortData[position]._time = time;
+					sortData[position]._deadline =  deadline;
+					sortData[position]._timeLeft = timeLeft;
+					sortData[position]._processNumber = processNumber;
+				}
+			}
+		}
 
 		function makeProgressInGanttSquare(y, x, color=green, _delay=(globalDelay+=600)) {
 			if(x == maxGanttGraphCol) {
