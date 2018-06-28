@@ -198,17 +198,21 @@
 		var grey = "90a4ae";
 		
 		function fifo(){
-			var ultimo=0;
+			var lastPosition = 0;
 			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
-			for(let i=0; i<sortData.length; i++){
-				if(ultimo<sortData[i]._start){
-					ultimo=sortData[i]._start;
+			for(let i = 0; i < sortData.length; i++){
+				if(lastPosition < sortData[i]._start){
+					lastPosition = sortData[i]._start;
 				}
 				for(let j=0; j<sortData[i]._time; j++){
-					makeProgressInGanttSquare(sortData[i]._processNumber, ultimo, colors[0]);
-					ultimo++;
+					makeProgressInGanttSquare(sortData[i]._processNumber, lastPosition, colors[0]);
+					lastPosition++;
 				}
 			}
+		}
+
+		function edf(){
+			var lastPosition=0;
 		}
 
 		function main() {
@@ -217,7 +221,7 @@
 			
 			// Use makeProgressInGanttSquare(y, x [,color=optional]) function to fill the graph
 			// Example:
-			//fifo(); 
+			fifo(); 
 		}
 
 		processNumberInput.on('change', function(event) {
