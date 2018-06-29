@@ -169,6 +169,8 @@
 		"use strict";
 		var data;
 		var sortData;
+		var currentProcess;
+		var extremeDeadline = 1000000;
 		var mainForm = $("#main_form");
 		var processNumberInput = $("#process_number");
 		var quamtumNumberInput = $("#quamtum_number");
@@ -196,11 +198,22 @@
 		var green = "#4db6ac";
 		var red = "#e57373";
 		var grey = "90a4ae";
+
+		function choiceProcess(actualTime) {
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+			var minDeadline = extremeDeadline;
+			for(let j=0; j<sortData.length; j++){
+				if(sortData[j]._start <= actualTime && sortData[j]._timeLeft > 0 && sortData[j]._deadline < minDeadline){
+					minDeadline = sortData[j]._deadline;
+					currentProcess = j;
+				}	
+			}
+		}
 		
 		function fifo(){
 			var lastPosition = 0;
 			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
-			for(let i = 0; i < sortData.length; i++){
+			for(let i= 0; i < sortData.length; i++){
 				if(lastPosition < sortData[i]._start){
 					lastPosition = sortData[i]._start;
 				}
@@ -212,7 +225,49 @@
 		}
 
 		function edf(){
-			var lastPosition=0;
+			var lastPosition = 0;
+			var finhishedProcess = 0;
+			var allProcess = sortData.length;
+			var timeForExecution;
+			var timeAfterDeadline;
+			var endOneProcess = 0;
+			var proc = 0;
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+			while(finhishedProcess < allProcess){
+				currentProcess = -1;
+				endOneProcess = 0;
+				timeForExecution = 0;
+				choiceProcess(lastPosition);
+				while(currentProcess == -1){
+					lastPosition++;
+					choiceProcess(lastPosition);
+				}
+				
+				if(sortData[currentProcess]._timeLeft <= data["quantum"]){
+					timeForExecution = sortData[currentProcess]._timeLeft;
+					endOneProcess = 1;
+				}else{
+					timeForExecution = data["quantum"];
+				}
+
+				sortData[currentProcess]._timeLeft = sortData[currentProcess]._timeLeft - timeForExecution;
+				var colorConsideringDeadline = 0;
+				for(let j = 0; j < timeForExecution; j++){
+					if(sortData[currentProcess]._deadline <= lastPosition){
+						colorConsideringDeadline=2;
+					}
+					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[colorConsideringDeadline]);
+					lastPosition++;
+				}
+				if(endOneProcess == 1){
+					finhishedProcess++;
+				}else{
+					for(let j = 0; j < data["overload"]; j++){
+						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[1]);
+						lastPosition++;
+					}
+				}
+			}
 		}
 
 		function main() {
@@ -221,7 +276,8 @@
 			
 			// Use makeProgressInGanttSquare(y, x [,color=optional]) function to fill the graph
 			// Example:
-			fifo(); 
+			//fifo(); 
+			//edf();
 		}
 
 		processNumberInput.on('change', function(event) {
@@ -384,7 +440,7 @@
 				sortData[i] = {
 							"_start"    : parseInt(data[i]._start), 
 							"_time"     : parseInt(data[i]._time),
-							"_deadline" : parseInt(data[i]._deadline),
+							"_deadline" : parseInt(data[i]._deadline + data[i]._start),
 							"_priority" : parseInt(data[i]._priority),
 							"_timeLeft" : parseInt(data[i]._time),
 							"_processNumber" : parseInt(i),
