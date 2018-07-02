@@ -176,7 +176,6 @@
 		var quamtumNumberInput = $("#quamtum_number");
 		var overloadNumberInput = $("#overload_number");
 		var pageReplacementInput = $("#page_replacement");
-		var algorithmInput = $("input[name=algorithm]:checked", "#main_form");
 		var resetButton = $("#reset_btn");
 		var progressBar = $("#progress_bar");
 		var overlayPanel = $("#overlay_panel");
@@ -197,10 +196,10 @@
 		var globalDelay = 0;
 		var green = "#4db6ac";
 		var red = "#e57373";
-		var grey = "90a4ae";
+		var grey = "#90a4ae";
+		var colors = ["#4db6ac", "#e57373", "#90a4ae"];
 
 		function choiceProcess(actualTime) {
-			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
 			var minDeadline = extremeDeadline;
 			for(let j=0; j<sortData.length; j++){
 				if(sortData[j]._start <= actualTime && sortData[j]._timeLeft > 0 && sortData[j]._deadline < minDeadline){
@@ -212,30 +211,28 @@
 		
 		function fifo(){
 			var lastPosition = 0;
-			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
-			for(let i= 0; i < sortData.length; i++){
-				if(lastPosition < sortData[i]._start){
+			for(let i= 0; i < sortData.length; i++) {
+				if(lastPosition < sortData[i]._start) {
 					lastPosition = sortData[i]._start;
 				}
-				for(let j=0; j<sortData[i]._time; j++){
-					makeProgressInGanttSquare(sortData[i]._processNumber, lastPosition, colors[0]);
+				for(let j=0; j<sortData[i]._time; j++) {
+					makeProgressInGanttSquare(sortData[i]._processNumber, lastPosition);
 					lastPosition++;
 				}
 			}
 		}
         
-        function sjf(){
+        function sjf() {
 			var lastPosition = 0;
-			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
             var onTime = [];
             var count = 0;
             var next;
             
-            for(let i=0; i < sortData.length; i++){
+            for(let i=0; i < sortData.length; i++) {
                 if(lastPosition < sortData[i]._start){
 					lastPosition = sortData[i]._start;
 				}
-                for (count; count < sortData.length; count++){
+                for (count; count < sortData.length; count++) {
                     if (sortData[count]._start <= lastPosition){
                         onTime[count] = count;
                     }else{
@@ -243,7 +240,7 @@
                     }
                 }
                 next = null;
-                for (let j=0; j < onTime.length; j++){
+                for (let j=0; j < onTime.length; j++) {
                     if (onTime[j] == -1){ continue; }
                     if (next == null){
                         next = j;
@@ -253,14 +250,14 @@
                 }
                 onTime[next] = -1;
 
-                for(let j=0; j<sortData[next]._time; j++){
-                    makeProgressInGanttSquare(sortData[next]._processNumber, lastPosition, colors[0]);
+                for(let j=0; j<sortData[next]._time; j++) {
+                    makeProgressInGanttSquare(sortData[next]._processNumber, lastPosition);
                     lastPosition++;
                 }
             }
 		}
         
-        function roundrobin(){
+        function roundRobin() {
             var lastPosition = 0;
             var spinning = [];
             var count = 0;
@@ -270,7 +267,6 @@
             var nextIsOver;
             var rrIsOver = false;
             var spinningIsOver = false;
-            let colors = ["#4db6ac", "#e57373", "#90a4ae"];
             
             while(!rrIsOver){
                 
@@ -299,7 +295,7 @@
                     sortData[currentProcess]._timeLeft -= timeForExecution;
 
                     for(let j = 0; j < timeForExecution; j++){
-                        makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[0]);
+                        makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
                         lastPosition++;
                     }
                     if(nextIsOver){
@@ -315,7 +311,7 @@
                         }
                     }else{
                         for(let j = 0; j < data["overload"]; j++){
-                            makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[1]);
+                            makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
                             lastPosition++;
                         }
                         for (; count < sortData.length; count++){
@@ -333,7 +329,7 @@
             }
         }
 
-		function edf(){
+		function edf() {
 			var lastPosition = 0;
 			var finhishedProcess = 0;
 			var allProcess = sortData.length;
@@ -341,7 +337,7 @@
 			var timeAfterDeadline;
 			var endOneProcess = 0;
 			var proc = 0;
-			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+
 			while(finhishedProcess < allProcess){
 				currentProcess = -1;
 				endOneProcess = 0;
@@ -352,10 +348,10 @@
 					choiceProcess(lastPosition);
 				}
 				
-				if(sortData[currentProcess]._timeLeft <= data["quantum"]){
+				if(sortData[currentProcess]._timeLeft <= data["quantum"]) {
 					timeForExecution = sortData[currentProcess]._timeLeft;
 					endOneProcess = 1;
-				}else{
+				}else {
 					timeForExecution = data["quantum"];
 				}
 
@@ -372,7 +368,7 @@
 					finhishedProcess++;
 				}else{
 					for(let j = 0; j < data["overload"]; j++){
-						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[1]);
+						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
 						lastPosition++;
 					}
 				}
@@ -380,15 +376,26 @@
 		}
 
 		function main() {
-			// Array "data" keeps the information. See the structure in the console
-			console.log(data);
 			
-			// Use makeProgressInGanttSquare(y, x [,color=optional]) function to fill the graph
-			// Example:
-			fifo(); 
-			//sjf();
-            //roundrobin();
-            //edf();
+			switch (data["algorithm"]) {
+			    case "FIFO":
+			        window.alert("FIFO");
+			        fifo(); 
+			        break;
+			    case "SJF":
+			        sjf();
+			        break;
+			    case "RR":
+			        roundRobin();
+			        break;
+			    case "EDF":
+			        edf();
+			        break;
+			    default:
+			    	window.alert("Erro Fatal");
+       				break;
+			}
+
 		}
 
 		processNumberInput.on('change', function(event) {
@@ -438,7 +445,7 @@
 			if(!(processNumberInput.val()).length) {
 				errorMsg += "Número de processos não pode ser nulo!<br>";
 			} else {
-				for (var i = 0; i < n; i++) {
+				for (let i = 0; i < n; i++) {
 					if(!($("#process_"+i+"_start").val()).length || !($("#process_"+i+"_time").val()).length || !($("#process_"+i+"_deadline").val()).length || !($("#process_"+i+"_priority").val()).length) {
 						errorMsg += "Dados do processo "+i+" estão incompletos!<br>";
 					} else {
@@ -469,9 +476,9 @@
 					progressBar.show('fast');
 					overlayPanel.show('fast');
 				});
-				data["algorithm"] = algorithmInput.val();
+				data["algorithm"] = $("input[name=algorithm]:checked", "#main_form").val();
 				data["pageReplacement"] = pageReplacementInput.val();
-				for (var i = 0; i < n; i++) {
+				for (let i = 0; i < n; i++) {
 					$("#gantt_inner_info_square_"+i+"_0 span").html(data[i]._start);
 					$("#gantt_inner_info_square_"+i+"_1 span").html(data[i]._time);
 					$("#gantt_inner_info_square_"+i+"_2 span").html(data[i]._deadline);
@@ -492,7 +499,7 @@
 			});
 		});
 
-		$(document).ready(function(){
+		$( document ).ready(function() {
 			$('select').formSelect();
 			$('.modal').modal();
 			$('.0-to-9').mask('9');
