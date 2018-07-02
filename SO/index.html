@@ -256,6 +256,7 @@
                     makeProgressInGanttSquare(sortData[next]._processNumber, lastPosition);
                     lastPosition++;
                 }
+                sortData[next]._endTime = lastPosition;
             }
 		}
         
@@ -301,6 +302,7 @@
                         lastPosition++;
                     }
                     if(nextIsOver){
+                        sortData[currentProcess]._endTime = lastPosition;
                         for (;count < sortData.length; count++){
                             if (sortData[count]._start <= lastPosition){
                                 spinning.push(count);
@@ -390,7 +392,7 @@
 			
 			switch (data["algorithm"]) {
 			    case "FIFO":
-			        window.alert("FIFO");
+			        //window.alert("FIFO");
 			        fifo(); 
 			        break;
 			    case "SJF":
