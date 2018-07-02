@@ -171,6 +171,7 @@
 		var sortData;
 		var currentProcess;
 		var extremeDeadline = 1000000;
+		var turnAround;
 		var mainForm = $("#main_form");
 		var processNumberInput = $("#process_number");
 		var quamtumNumberInput = $("#quamtum_number");
@@ -219,6 +220,7 @@
 					makeProgressInGanttSquare(sortData[i]._processNumber, lastPosition);
 					lastPosition++;
 				}
+				sortData[i]._endTime = lastPosition;
 			}
 		}
         
@@ -366,12 +368,20 @@
 				}
 				if(endOneProcess == 1){
 					finhishedProcess++;
-				}else{
+					sortData[currentProcess]._endTime = lastPosition;
+				}else{ 
 					for(let j = 0; j < data["overload"]; j++){
 						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
 						lastPosition++;
 					}
 				}
+			}
+		}
+
+		function meanTurnAround(){
+			turnAround = 0;
+			for(let i = 0; i < sortData.length; i++){
+				turnAround+=(sortData[i]._endTime - sortData[i]._start);
 			}
 		}
 
@@ -395,7 +405,7 @@
 			    	window.alert("Erro Fatal");
        				break;
 			}
-
+			meanTurnAround();
 		}
 
 		processNumberInput.on('change', function(event) {
@@ -553,6 +563,7 @@
 			var position;
 			var io = 0;
 			var processNumber;
+			var endTime=0;
 
 			for(let i = 0; i < data.length; i++){
 				sortData[i] = {
@@ -562,7 +573,8 @@
 							"_priority" : parseInt(data[i]._priority),
 							"_timeLeft" : parseInt(data[i]._time),
 							"_processNumber" : parseInt(i),
-							"_makingIO" : parseInt(io)
+							"_makingIO" : parseInt(io),
+							"_endTime"  : parseInt(endTime)
 				};
 			}
 
