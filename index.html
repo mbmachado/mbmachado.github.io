@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<title>Escalonador de Processos</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="assets/vendor/materialize/css/materialize.min.css">
+	<link rel="stylesheet" href="assets/css/stylesheet.css">
+	<link rel="icon" href="assets/img/favicon.png">
+	<link rel="manifest" href="manifest.json">
+</head>
+<body class="blue-grey lighten-5">
+	<div class="row my-no-m-b">
+		<div class="col s12 m3 l3 teal lighten-2">
+			<div class="row my-no-m-b">
+				<div class="col s12">
+					<h5 class="center-align blue-grey-text text-lighten-5">Escalonador de Processos</h5>
+					<p class="center-align blue-grey-text text-lighten-5">By Enrique W., Mateus B. e Mateus C.</p>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col s12">
+					<div class="card-panel my-main-card">
+						<div id="progress_bar" class="progress my-progress-bar indigo lighten-4">
+						    <div class="indeterminate indigo darken-2"></div>
+						</div>
+						<div id="overlay_panel" class="my-overlay"></div>
+						<form id="main_form" action="#" method="POST">
+							<div class="row">
+								<div class="input-field col s12">
+						        	<input id="process_number" type="text" class="1-to-5" autocomplete="off">
+						        	<label class="truncate" for="process_number">Número de Processos</label>
+						        </div>
+							</div>
+							<div class="row">
+								<div class="input-field col s6">
+						        	<input id="quamtum_number" type="text" class="1-to-9" autocomplete="off">
+						        	<label for="quamtum_number">Quamtum</label>
+						        </div>
+						        <div class="input-field col s6">
+						        	<input id="overload_number" type="text" class="0-to-9" autocomplete="off">
+						        	<label for="overload_number">Sobrecarga</label>
+						        </div>
+							</div>
+							<div class="row">
+								<div class="input-field col s12">
+									<select id="page_replacement">
+										<option value="FIFO" selected>FIFO</option>
+										<option value="LRU">Menos recentemente utilizado</option>
+									</select>
+									<label>Substituição de Páginas</label>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col s12">
+									<label>Algoritmo de escalonamento</label>
+									<p>
+										<label>
+											<input class="with-gap" name="algorithm" value="FIFO" type="radio" checked/>
+											<span>FIFO</span>
+										</label>
+									</p>
+									<p>
+										<label>
+											<input class="with-gap" name="algorithm" value="SJF" type="radio"/>
+											<span>SJF</span>
+										</label>
+									</p>
+									<p>
+										<label>
+											<input class="with-gap" name="algorithm" value="RR" type="radio"/>
+											<span>Round Robin</span>
+										</label>
+									</p>
+									<p>
+										<label>
+											<input class="with-gap" name="algorithm" value="EDF" type="radio"/>
+											<span>EDF</span>
+										</label>
+									</p>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col s6 m4">
+									<button class="btn waves-effect waves-light" type="submit" name="action">Iniciar</button>
+								</div>
+								<div class="col s6 m4">
+									<button id="reset_btn" class="btn waves-effect waves-red blue-grey lighten-4 blue-grey-text text-darken-4" type="reset">Limpar</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col s12 m9 l9 blue-grey lighten-5">
+			<div id="processes_info_box" class="row"></div>
+			<div id="graphs_box" class="row">
+				<div class="col s12">
+					<div class="card-panel">
+						<div class="row">
+							<div class="col s12">
+								<h6>Gráfico de Gantt</h6>
+							</div>
+						</div>
+						<div id="gantt_graph" class="my-gantt-graph"></div>
+						<div class="row">
+							<div class="col s6 m3 valign-wrapper">
+								<div class="my-subtitle-square teal lighten-2"></div>
+								<label>Executando</label>
+							</div>
+							<div class="col s6 m3 valign-wrapper">
+								<div class="my-subtitle-square  red lighten-2"></div>
+								<label>Sobrecarga</label>
+							</div>
+							<div class="col s6 m3 valign-wrapper">
+								<div class="my-subtitle-square blue-grey lighten-2"></div>
+								<label>Estouro DL</label>
+							</div>
+							<div class="col s6 m3">
+								<div class="switch right-align my-switch">
+								    <label>
+								    	Rolagem automática
+								    	<input type="checkbox" checked>
+								    	<span class="lever my-lever"></span>
+								    </label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col s12 m4">
+					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
+						<h6>Memória RAM</h6>
+					</div>
+				</div>
+				<div class="col s12 m4">
+					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
+						<h6>Disco</h6>
+					</div>
+				</div>
+				<div class="col s12 m4">
+					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
+						<h6>Tabela de Páginas</h6>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+    <div class="fixed-action-btn">
+    	<a id="replay_btn" href="#" class="btn-floating btn-large waves-effect waves-light pulse"><i class="material-icons">replay</i></a>
+    </div>
+    <div id="error_modal" class="modal">
+	    <div class="modal-content">
+	      <h4>Erro</h4>
+	      <p id="modal_content"></p>
+	    </div>
+	    <div class="modal-footer">
+	      <a href="#!" class="modal-close waves-effect waves-teal btn-flat">Ok</a>
+	    </div>
+  	</div>
+	<script src="assets/vendor/jQuery/jquery-3.3.1.min.js"></script>
+	<script src="assets/vendor/velocity/velocity.min.js"></script>
+	<script src="assets/vendor/jQuery-Mask-Plugin/dist/jquery.mask.min.js"></script>
+	<script src="assets/vendor/materialize/js/materialize.min.js"></script>
+	<script src="assets/js/script.js"></script>
+	<script>
+		"use strict";
+		var data;
+		var sortData;
+		var currentProcess;
+		var extremeDeadline = 1000000;
+		var mainForm = $("#main_form");
+		var processNumberInput = $("#process_number");
+		var quamtumNumberInput = $("#quamtum_number");
+		var overloadNumberInput = $("#overload_number");
+		var pageReplacementInput = $("#page_replacement");
+		var algorithmInput = $("input[name=algorithm]:checked", "#main_form");
+		var resetButton = $("#reset_btn");
+		var progressBar = $("#progress_bar");
+		var overlayPanel = $("#overlay_panel");
+
+		var processesInfoBox = $("#processes_info_box");
+		var graphsBox = $("#graphs_box");
+		var ganttGraph = $("#gantt_graph");
+		var visibleGanttGraphWidth = ganttGraph.width();
+		var progressGanttGraphWidth = 148;
+		var maxGanttGraphCol = 30;
+		var scrollPosition = 70;
+		var lastScrollDelay = 0;
+
+		var errorModal = $("#error_modal");
+		var modalContent = $("#modal_content");
+		var replayBtn = $("#replay_btn");
+
+		var globalDelay = 0;
+		var green = "#4db6ac";
+		var red = "#e57373";
+		var grey = "90a4ae";
+
+		function choiceProcess(actualTime) {
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+			var minDeadline = extremeDeadline;
+			for(let j=0; j<sortData.length; j++){
+				if(sortData[j]._start <= actualTime && sortData[j]._timeLeft > 0 && sortData[j]._deadline < minDeadline){
+					minDeadline = sortData[j]._deadline;
+					currentProcess = j;
+				}	
+			}
+		}
+		
+		function fifo(){
+			var lastPosition = 0;
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+			for(let i= 0; i < sortData.length; i++){
+				if(lastPosition < sortData[i]._start){
+					lastPosition = sortData[i]._start;
+				}
+				for(let j=0; j<sortData[i]._time; j++){
+					makeProgressInGanttSquare(sortData[i]._processNumber, lastPosition, colors[0]);
+					lastPosition++;
+				}
+			}
+		}
+        
+        function sjf(){
+			var lastPosition = 0;
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+            var onTime = [];
+            var count = 0;
+            var next;
+            
+            for(let i=0; i < sortData.length; i++){
+                if(lastPosition < sortData[i]._start){
+					lastPosition = sortData[i]._start;
+				}
+                for (count; count < sortData.length; count++){
+                    if (sortData[count]._start <= lastPosition){
+                        onTime[count] = count;
+                    }else{
+                        break;
+                    }
+                }
+                next = null;
+                for (let j=0; j < onTime.length; j++){
+                    if (onTime[j] == -1){ continue; }
+                    if (next == null){
+                        next = j;
+                    }else if (sortData[j]._time < sortData[next]._time){
+                        next = j;
+                    }
+                }
+                onTime[next] = -1;
+
+                for(let j=0; j<sortData[next]._time; j++){
+                    makeProgressInGanttSquare(sortData[next]._processNumber, lastPosition, colors[0]);
+                    lastPosition++;
+                }
+            }
+		}
+        
+        function roundrobin(){
+            var lastPosition = 0;
+            var spinning = [];
+            var count = 0;
+            var countLastPos = 0;
+            var currentProcess;
+            var timeForExecution;
+            var nextIsOver;
+            var rrIsOver = false;
+            var spinningIsOver = false;
+            let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+            
+            while(!rrIsOver){
+                
+                if(lastPosition < sortData[count]._start){
+					lastPosition = sortData[count]._start;
+				}
+                for (;count < sortData.length; count++){
+                    if (sortData[count]._start <= lastPosition){
+                        spinning.push(count);
+                    }else{
+                        break;
+                    }
+                }
+                    
+                spinningIsOver = false;
+                while (!spinningIsOver){
+                    if (spinning.length <= 0){ break; }
+                    currentProcess = spinning.shift();
+                    if(sortData[currentProcess]._timeLeft <= data["quantum"]){
+                        timeForExecution = sortData[currentProcess]._timeLeft;
+                        nextIsOver = true;
+                    }else{
+                        timeForExecution = data["quantum"];
+                        nextIsOver = false;
+                    }
+                    sortData[currentProcess]._timeLeft -= timeForExecution;
+
+                    for(let j = 0; j < timeForExecution; j++){
+                        makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[0]);
+                        lastPosition++;
+                    }
+                    if(nextIsOver){
+                        for (;count < sortData.length; count++){
+                            if (sortData[count]._start <= lastPosition){
+                                spinning.push(count);
+                            }else{
+                                break;
+                            }
+                        }
+                        if (spinning.length <= 0){
+                            spinningIsOver = true;
+                        }
+                    }else{
+                        for(let j = 0; j < data["overload"]; j++){
+                            makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[1]);
+                            lastPosition++;
+                        }
+                        for (; count < sortData.length; count++){
+                            if (sortData[count]._start <= lastPosition){
+                                spinning.push(count);
+                            }else{
+                                break;
+                            }
+                        }
+                        spinning.push(currentProcess);
+                    }
+                }
+                
+                if (count >= sortData.length) { rrIsOver = true; }
+            }
+        }
+
+		function edf(){
+			var lastPosition = 0;
+			var finhishedProcess = 0;
+			var allProcess = sortData.length;
+			var timeForExecution;
+			var timeAfterDeadline;
+			var endOneProcess = 0;
+			var proc = 0;
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+			while(finhishedProcess < allProcess){
+				currentProcess = -1;
+				endOneProcess = 0;
+				timeForExecution = 0;
+				choiceProcess(lastPosition);
+				while(currentProcess == -1){
+					lastPosition++;
+					choiceProcess(lastPosition);
+				}
+				
+				if(sortData[currentProcess]._timeLeft <= data["quantum"]){
+					timeForExecution = sortData[currentProcess]._timeLeft;
+					endOneProcess = 1;
+				}else{
+					timeForExecution = data["quantum"];
+				}
+
+				sortData[currentProcess]._timeLeft = sortData[currentProcess]._timeLeft - timeForExecution;
+				var colorConsideringDeadline = 0;
+				for(let j = 0; j < timeForExecution; j++){
+					if(sortData[currentProcess]._deadline <= lastPosition){
+						colorConsideringDeadline=2;
+					}
+					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[colorConsideringDeadline]);
+					lastPosition++;
+				}
+				if(endOneProcess == 1){
+					finhishedProcess++;
+				}else{
+					for(let j = 0; j < data["overload"]; j++){
+						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[1]);
+						lastPosition++;
+					}
+				}
+			}
+		}
+
+		function main() {
+			// Array "data" keeps the information. See the structure in the console
+			console.log(data);
+			
+			// Use makeProgressInGanttSquare(y, x [,color=optional]) function to fill the graph
+			// Example:
+			fifo(); 
+			//sjf();
+            //roundrobin();
+            //edf();
+		}
+
+		processNumberInput.on('change', function(event) {
+			event.preventDefault();
+			processesInfoBox.empty();
+			let n = parseInt(processNumberInput.val());
+			for (let i = 0; i < n; i++) {
+				processesInfoBox.append(
+					'<div class="col s12 m3">\
+						<div class="card">\
+					        <div class="card-content">\
+					        	<span class="card-title">Processo '+i+'</span>\
+					        	<div class="row">\
+							        <div class="input-field col s6">\
+							        	<input id="process_'+i+'_start" type="text" class="0-to-99" autocomplete="off">\
+							        	<label for="process_'+i+'_start">Chegada</label>\
+							        </div>\
+									<div class="input-field col s6">\
+							        	<input id="process_'+i+'_time" type="text" class="0-to-99" autocomplete="off">\
+							        	<label for="process_'+i+'_time">Tempo</label>\
+							        </div>\
+								</div>\
+								<div class="row">\
+							        <div class="input-field col s6">\
+							        	<input id="process_'+i+'_deadline" type="text" class="0-to-99" autocomplete="off">\
+							        	<label for="process_'+i+'_deadline">Deadline</label>\
+							        </div>\
+									<div class="input-field col s6">\
+							        	<input id="process_'+i+'_priority" type="text" class="0-to-99" autocomplete="off">\
+							        	<label for="process_'+i+'_priority">Prioridade</label>\
+							        </div>\
+								</div>\
+					        </div>\
+					    </div>\
+				    </div>'
+				);
+			}
+			$('.0-to-99').mask('00');
+			graphsBox.hide(0, function() {
+				processesInfoBox.show('fast');
+			});
+		});
+
+		mainForm.on('submit', function(event) {
+			event.preventDefault();
+			let n = parseInt(processNumberInput.val()), errorMsg = ""; data = [];
+			if(!(processNumberInput.val()).length) {
+				errorMsg += "Número de processos não pode ser nulo!<br>";
+			} else {
+				for (var i = 0; i < n; i++) {
+					if(!($("#process_"+i+"_start").val()).length || !($("#process_"+i+"_time").val()).length || !($("#process_"+i+"_deadline").val()).length || !($("#process_"+i+"_priority").val()).length) {
+						errorMsg += "Dados do processo "+i+" estão incompletos!<br>";
+					} else {
+						data[i] = {
+							"_start"    : parseInt($("#process_"+i+"_start").val()), 
+							"_time"     : parseInt($("#process_"+i+"_time").val()),
+							"_deadline" : parseInt($("#process_"+i+"_deadline").val()),
+							"_priority" : parseInt($("#process_"+i+"_priority").val())
+						};
+					}
+				}
+				data["processes"] = parseInt(processNumberInput.val());
+			}
+			if (!(quamtumNumberInput.val()).length) {
+				errorMsg += "Quamtum não pode ser nulo!<br>";
+			} else {
+				data["quantum"] = parseInt(quamtumNumberInput.val()); 
+			}  
+			if (!(overloadNumberInput.val()).length) {
+				errorMsg += "Sobrecarga não pode ser nulo!<br>";
+			} else {
+				data["overload"] = parseInt(overloadNumberInput.val()); 
+			}
+			if(!(errorMsg).length) {
+				$("html").animate({scrollTop:0}, 500);
+				processesInfoBox.hide(0, function(){
+					graphsBox.show('fast');
+					progressBar.show('fast');
+					overlayPanel.show('fast');
+				});
+				data["algorithm"] = algorithmInput.val();
+				data["pageReplacement"] = pageReplacementInput.val();
+				for (var i = 0; i < n; i++) {
+					$("#gantt_inner_info_square_"+i+"_0 span").html(data[i]._start);
+					$("#gantt_inner_info_square_"+i+"_1 span").html(data[i]._time);
+					$("#gantt_inner_info_square_"+i+"_2 span").html(data[i]._deadline);
+					$("#gantt_inner_info_square_"+i+"_3 span").html(i);
+				}
+				sortByArrivalTime();
+				main();
+			} else {
+				modalContent.html(errorMsg);
+				errorModal.modal('open');
+			}
+		});
+
+		resetButton.on('click', function(event) {
+			processesInfoBox.empty();
+			processesInfoBox.hide(0, function() {
+				graphsBox.show('fast');
+			});
+		});
+
+		$(document).ready(function(){
+			$('select').formSelect();
+			$('.modal').modal();
+			$('.0-to-9').mask('9');
+			$('.1-to-9').mask('n', {
+			    translation: {
+			      	'n': {
+			    		pattern: /[1-9]/
+			    	}
+			    }
+			});
+			$('.1-to-5').mask('n', {
+			    translation: {
+			      	'n': {
+			    		pattern: /[1-5]/
+			    	}
+			    }
+			});
+
+			for (let d = ['TC', 'TE', 'D', 'Nº'], i = 0; i < 4; i++) {
+				ganttGraph.append('\
+					<div class="my-gantt-col">\
+						<div class="my-gantt-square"><span>'+d[i]+'</span></div>\
+						<div id="gantt_inner_info_square_4_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="gantt_inner_info_square_3_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="gantt_inner_info_square_2_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="gantt_inner_info_square_1_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="gantt_inner_info_square_0_'+i+'" class="my-gantt-square"><span></span></div>\
+					</div>\
+				');
+			}
+			for (let i = 0; i < 31; i++) {
+				ganttGraph.append('\
+					<div class="my-gantt-col">\
+						<div class="my-gantt-square"><span>'+i+'</span></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_4_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_3_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_2_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_1_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
+					</div>\
+				');
+			}
+		});
+
+		function sortByArrivalTime() {
+			sortData = [];
+			var start;
+			var time;
+			var deadline;
+			var timeLeft;
+			var position;
+			var io = 0;
+			var processNumber;
+
+			for(let i = 0; i < data.length; i++){
+				sortData[i] = {
+							"_start"    : parseInt(data[i]._start), 
+							"_time"     : parseInt(data[i]._time),
+							"_deadline" : parseInt(data[i]._deadline + data[i]._start),
+							"_priority" : parseInt(data[i]._priority),
+							"_timeLeft" : parseInt(data[i]._time),
+							"_processNumber" : parseInt(i),
+							"_makingIO" : parseInt(io)
+				};
+			}
+
+			for(let i = 0; i < sortData.length; i++){
+				position = i;
+				for(let j = i+1; j<sortData.length; j++){
+					if(sortData[position]._start > sortData[j]._start){
+						position = j;
+					}
+				}
+				if(position != i){
+					start = sortData[i]._start;
+					time = sortData[i]._time;
+					deadline = sortData[i]._deadline;
+					timeLeft = sortData[i]._timeLeft;
+					processNumber =  sortData[i]._processNumber;
+					sortData[i]._start = sortData[position]._start;
+					sortData[i]._time = sortData[position]._time;
+					sortData[i]._deadline = sortData[position]._deadline;
+					sortData[i]._timeLeft = sortData[position]._timeLeft;
+					sortData[i]._processNumber = sortData[position]._processNumber;
+					sortData[position]._start = start;
+					sortData[position]._time = time;
+					sortData[position]._deadline =  deadline;
+					sortData[position]._timeLeft = timeLeft;
+					sortData[position]._processNumber = processNumber;
+				}
+			}
+		}
+
+		function makeProgressInGanttSquare(y, x, color=green, _delay=(globalDelay+=600)) {
+			if(x == maxGanttGraphCol) {
+				let i = ++maxGanttGraphCol;
+				ganttGraph.append('\
+					<div class="my-gantt-col">\
+						<div class="my-gantt-square"><span>'+i+'</span></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_4_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_3_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_2_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_1_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div class="my-gantt-square"><div id="gantt_inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
+					</div>\
+				');
+			}
+
+			let square = $("#gantt_inner_square_"+y+"_"+x);
+			square.css('background-color', color);
+			progressGanttGraphWidth += 37;
+
+			if(progressGanttGraphWidth >= visibleGanttGraphWidth) {
+				ganttGraph.delay(_delay - lastScrollDelay).animate({scrollLeft:scrollPosition}, 400);
+				lastScrollDelay = _delay;
+				scrollPosition += 70;
+			}
+
+			square.velocity({width: "100%"}, {duration:600, delay: _delay, mobileHA: false});
+			/*Different approach*///square.delay(_delay).animate({width: "100%"}, 600);
+		}
+
+		replayBtn.on('click', function(event) {
+			event.preventDefault();
+			location.reload();
+		});		
+
+		$( window ).resize(function() {
+			visibleGanttGraphWidth = ganttGraph.width();
+		});
+
+	</script>
+</body>
+</html>
