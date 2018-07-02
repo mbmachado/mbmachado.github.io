@@ -223,6 +223,115 @@
 				}
 			}
 		}
+        
+        function sjf(){
+			var lastPosition = 0;
+			let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+            var onTime = [];
+            var count = 0;
+            var next;
+            
+            for(let i=0; i < sortData.length; i++){
+                if(lastPosition < sortData[i]._start){
+					lastPosition = sortData[i]._start;
+				}
+                for (count; count < sortData.length; count++){
+                    if (sortData[count]._start <= lastPosition){
+                        onTime[count] = count;
+                    }else{
+                        break;
+                    }
+                }
+                next = null;
+                for (let j=0; j < onTime.length; j++){
+                    if (onTime[j] == -1){ continue; }
+                    if (next == null){
+                        next = j;
+                    }else if (sortData[j]._time < sortData[next]._time){
+                        next = j;
+                    }
+                }
+                onTime[next] = -1;
+
+                for(let j=0; j<sortData[next]._time; j++){
+                    makeProgressInGanttSquare(sortData[next]._processNumber, lastPosition, colors[0]);
+                    lastPosition++;
+                }
+            }
+		}
+        
+        function roundrobin(){
+            var lastPosition = 0;
+            var spinning = [];
+            var count = 0;
+            var countLastPos = 0;
+            var currentProcess;
+            var timeForExecution;
+            var nextIsOver;
+            var rrIsOver = false;
+            var spinningIsOver = false;
+            let colors = ["#4db6ac", "#e57373", "#90a4ae"];
+            
+            while(!rrIsOver){
+                
+                if(lastPosition < sortData[count]._start){
+					lastPosition = sortData[count]._start;
+				}
+                for (;count < sortData.length; count++){
+                    if (sortData[count]._start <= lastPosition){
+                        spinning.push(count);
+                    }else{
+                        break;
+                    }
+                }
+                    
+                spinningIsOver = false;
+                while (!spinningIsOver){
+                    if (spinning.length <= 0){ break; }
+                    currentProcess = spinning.shift();
+                    if(sortData[currentProcess]._timeLeft <= data["quantum"]){
+                        timeForExecution = sortData[currentProcess]._timeLeft;
+                        nextIsOver = true;
+                    }else{
+                        timeForExecution = data["quantum"];
+                        nextIsOver = false;
+                    }
+                    sortData[currentProcess]._timeLeft -= timeForExecution;
+
+                    for(let j = 0; j < timeForExecution; j++){
+                        makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[0]);
+                        lastPosition++;
+                    }
+                    if(nextIsOver){
+                        for (;count < sortData.length; count++){
+                            if (sortData[count]._start <= lastPosition){
+                                spinning.push(count);
+                            }else{
+                                break;
+                            }
+                        }
+                        if (spinning.length <= 0){
+                            spinningIsOver = true;
+                        }
+                    }else{
+                        for(let j = 0; j < data["overload"]; j++){
+                            makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[1]);
+                            lastPosition++;
+                        }
+                        for (; count < sortData.length; count++){
+                            if (sortData[count]._start <= lastPosition){
+                                spinning.push(count);
+                            }else{
+                                break;
+                            }
+                        }
+                        spinning.push(currentProcess);
+                    }
+                }
+                
+                if (count >= sortData.length) { rrIsOver = true; }
+            }
+        }
 
 		function edf(){
 			var lastPosition = 0;
@@ -276,8 +385,10 @@
 			
 			// Use makeProgressInGanttSquare(y, x [,color=optional]) function to fill the graph
 			// Example:
-			//fifo(); 
-			//edf();
+			fifo(); 
+			//sjf();
+            //roundrobin();
+            //edf();
 		}
 
 		processNumberInput.on('change', function(event) {
