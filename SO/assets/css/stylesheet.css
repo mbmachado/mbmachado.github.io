@@ -34,6 +34,17 @@
     z-index: 2;
 }
 
+.my-inner-overlay {
+	display: none;
+	background-color: rgba(255,255,255,0.9);
+	margin: 20px 20px 0 20px;
+	padding: 20px 0;
+}
+
+.my-inner-overlay span {
+	font-size: 24px
+}
+
 #error_modal, button, input, a {
 	outline: none !important;
 }
@@ -49,7 +60,6 @@
 }
 
 .my-gantt-col {
-	border-left: 2px solid #cfd8dc;
 	float: left;
 	margin-bottom: 5px;
 	width: 37px;
@@ -64,6 +74,7 @@
 	width: 35px;
 	height: 37px;
 	border-bottom: 2px solid #cfd8dc; 
+	border-left: 2px solid #cfd8dc;
 }
 
 .my-gantt-inner-square {
@@ -100,4 +111,12 @@
 	height: 25px;
 	margin-right: 5px;
 	width: 25px;
+}
+
+.my-subtitle-line {
+	border-radius: 1px;
+	display: inline-block;
+	height: 25px;
+	margin-right: 5px;
+	width: 2px;
 }

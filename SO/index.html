@@ -25,11 +25,29 @@
 						<div id="progress_bar" class="progress my-progress-bar indigo lighten-4">
 						    <div class="indeterminate indigo darken-2"></div>
 						</div>
-						<div id="overlay_panel" class="my-overlay"></div>
+						<div id="overlay_panel" class="my-overlay">
+							<div id="inner_overlay_panel" class="my-inner-overlay">
+								<div class="row">
+									<div class="col s12 center-align">
+										<span>Turnaround Médio</span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col s12 center-align">
+										<span id="mean_turnaround"></span>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col s12 center-align">
+										<a id="replay_btn" class="waves-effect waves-light btn cyan lighten-2 pulse">De novo</a>
+									</div>
+								</div>
+							</div>
+						</div>
 						<form id="main_form" action="#" method="POST">
 							<div class="row">
 								<div class="input-field col s12">
-						        	<input id="process_number" type="text" class="1-to-5" autocomplete="off">
+						        	<input id="process_number" type="text" class="numbers" autocomplete="off">
 						        	<label class="truncate" for="process_number">Número de Processos</label>
 						        </div>
 							</div>
@@ -39,7 +57,7 @@
 						        	<label for="quamtum_number">Quamtum</label>
 						        </div>
 						        <div class="input-field col s6">
-						        	<input id="overload_number" type="text" class="0-to-9" autocomplete="off">
+						        	<input id="overload_number" type="text" class="1-to-9" autocomplete="off">
 						        	<label for="overload_number">Sobrecarga</label>
 						        </div>
 							</div>
@@ -106,19 +124,23 @@
 						</div>
 						<div id="gantt_graph" class="my-gantt-graph"></div>
 						<div class="row">
-							<div class="col s6 m3 valign-wrapper">
+							<div class="col s6 m2 valign-wrapper">
 								<div class="my-subtitle-square teal lighten-2"></div>
 								<label>Executando</label>
 							</div>
-							<div class="col s6 m3 valign-wrapper">
+							<div class="col s6 m2 valign-wrapper">
 								<div class="my-subtitle-square  red lighten-2"></div>
 								<label>Sobrecarga</label>
 							</div>
-							<div class="col s6 m3 valign-wrapper">
+							<div class="col s6 m2 valign-wrapper">
 								<div class="my-subtitle-square blue-grey lighten-2"></div>
 								<label>Estouro DL</label>
 							</div>
-							<div class="col s6 m3">
+							<div class="col s6 m2 valign-wrapper">
+								<div class="my-subtitle-line indigo darken-2"></div>
+								<label>DeadLine</label>
+							</div>
+							<div class="col s6 m4">
 								<div class="switch right-align my-switch">
 								    <label>
 								    	Rolagem automática
@@ -148,9 +170,6 @@
 			</div>
 		</div>
     </div>
-    <div class="fixed-action-btn">
-    	<a id="replay_btn" href="#" class="btn-floating btn-large waves-effect waves-light pulse"><i class="material-icons">replay</i></a>
-    </div>
     <div id="error_modal" class="modal">
 	    <div class="modal-content">
 	      <h4>Erro</h4>
@@ -171,7 +190,6 @@
 		var sortData;
 		var currentProcess;
 		var extremeDeadline = 1000000;
-		var turnAround;
 		var mainForm = $("#main_form");
 		var processNumberInput = $("#process_number");
 		var quamtumNumberInput = $("#quamtum_number");
@@ -180,12 +198,14 @@
 		var resetButton = $("#reset_btn");
 		var progressBar = $("#progress_bar");
 		var overlayPanel = $("#overlay_panel");
+		var innerOverlayPanel = $("#inner_overlay_panel");
+		var meanTurnaroundSpan = $("#mean_turnaround");
 
 		var processesInfoBox = $("#processes_info_box");
 		var graphsBox = $("#graphs_box");
 		var ganttGraph = $("#gantt_graph");
 		var visibleGanttGraphWidth = ganttGraph.width();
-		var progressGanttGraphWidth = 148;
+		var progressGanttGraphWidth;
 		var maxGanttGraphCol = 30;
 		var scrollPosition = 70;
 		var lastScrollDelay = 0;
@@ -210,7 +230,7 @@
 			}
 		}
 		
-		function fifo(){
+		function fifo() {
 			var lastPosition = 0;
 			for(let i= 0; i < sortData.length; i++) {
 				if(lastPosition < sortData[i]._start) {
@@ -273,11 +293,11 @@
             
             while(!rrIsOver){
                 
-                if(lastPosition < sortData[count]._start){
+                if(lastPosition < sortData[count]._start) {
 					lastPosition = sortData[count]._start;
 				}
-                for (;count < sortData.length; count++){
-                    if (sortData[count]._start <= lastPosition){
+                for (;count < sortData.length; count++) {
+                    if (sortData[count]._start <= lastPosition) {
                         spinning.push(count);
                     }else{
                         break;
@@ -288,7 +308,7 @@
                 while (!spinningIsOver){
                     if (spinning.length <= 0){ break; }
                     currentProcess = spinning.shift();
-                    if(sortData[currentProcess]._timeLeft <= data["quantum"]){
+                    if(sortData[currentProcess]._timeLeft <= data["quantum"]) {
                         timeForExecution = sortData[currentProcess]._timeLeft;
                         nextIsOver = true;
                     }else{
@@ -297,14 +317,14 @@
                     }
                     sortData[currentProcess]._timeLeft -= timeForExecution;
 
-                    for(let j = 0; j < timeForExecution; j++){
+                    for(let j = 0; j < timeForExecution; j++) {
                         makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
                         lastPosition++;
                     }
                     if(nextIsOver){
                         sortData[currentProcess]._endTime = lastPosition;
-                        for (;count < sortData.length; count++){
-                            if (sortData[count]._start <= lastPosition){
+                        for (;count < sortData.length; count++) {
+                            if (sortData[count]._start <= lastPosition) {
                                 spinning.push(count);
                             }else{
                                 break;
@@ -342,7 +362,11 @@
 			var endOneProcess = 0;
 			var proc = 0;
 
-			while(finhishedProcess < allProcess){
+			for (var i = 0; i < sortData.length; i++) {
+				colorizeBorder(i, sortData[i]._deadline);
+			}
+
+			while(finhishedProcess < allProcess) {
 				currentProcess = -1;
 				endOneProcess = 0;
 				timeForExecution = 0;
@@ -355,7 +379,7 @@
 				if(sortData[currentProcess]._timeLeft <= data["quantum"]) {
 					timeForExecution = sortData[currentProcess]._timeLeft;
 					endOneProcess = 1;
-				}else {
+				} else {
 					timeForExecution = data["quantum"];
 				}
 
@@ -371,8 +395,8 @@
 				if(endOneProcess == 1){
 					finhishedProcess++;
 					sortData[currentProcess]._endTime = lastPosition;
-				}else{ 
-					for(let j = 0; j < data["overload"]; j++){
+				}else { 
+					for(let j = 0; j < data["overload"]; j++) {
 						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
 						lastPosition++;
 					}
@@ -380,19 +404,18 @@
 			}
 		}
 
-		function meanTurnAround(){
-			turnAround = 0;
-			for(let i = 0; i < sortData.length; i++){
+		function meanTurnAround() {
+			let turnAround = 0;
+			for(let i = 0; i < sortData.length; i++) {
 				turnAround+=(sortData[i]._endTime - sortData[i]._start);
 			}
-			turnAround = turnAround/sortData.length;
+			return turnAround/sortData.length;
 		}
 
 		function main() {
 			
 			switch (data["algorithm"]) {
 			    case "FIFO":
-			        //window.alert("FIFO");
 			        fifo(); 
 			        break;
 			    case "SJF":
@@ -408,7 +431,12 @@
 			    	window.alert("Erro Fatal");
        				break;
 			}
-			meanTurnAround();
+
+			setTimeout(function() { 
+				progressBar.fadeOut('fast');
+				meanTurnaroundSpan.html(meanTurnAround()+" min");
+				innerOverlayPanel.show('fast');
+			}, globalDelay );
 		}
 
 		processNumberInput.on('change', function(event) {
@@ -417,28 +445,22 @@
 			let n = parseInt(processNumberInput.val());
 			for (let i = 0; i < n; i++) {
 				processesInfoBox.append(
-					'<div class="col s12 m3">\
+					'<div class="col s12 m4">\
 						<div class="card">\
 					        <div class="card-content">\
-					        	<span class="card-title">Processo '+i+'</span>\
-					        	<div class="row">\
-							        <div class="input-field col s6">\
+					        	<span class="card-title my-no-m-b">Processo '+i+'</span>\
+					        	<div class="row my-no-m-b">\
+							        <div class="input-field col s4">\
 							        	<input id="process_'+i+'_start" type="text" class="0-to-99" autocomplete="off">\
 							        	<label for="process_'+i+'_start">Chegada</label>\
 							        </div>\
-									<div class="input-field col s6">\
+									<div class="input-field col s4">\
 							        	<input id="process_'+i+'_time" type="text" class="0-to-99" autocomplete="off">\
 							        	<label for="process_'+i+'_time">Tempo</label>\
 							        </div>\
-								</div>\
-								<div class="row">\
-							        <div class="input-field col s6">\
+							        <div class="input-field col s4">\
 							        	<input id="process_'+i+'_deadline" type="text" class="0-to-99" autocomplete="off">\
 							        	<label for="process_'+i+'_deadline">Deadline</label>\
-							        </div>\
-									<div class="input-field col s6">\
-							        	<input id="process_'+i+'_priority" type="text" class="0-to-99" autocomplete="off">\
-							        	<label for="process_'+i+'_priority">Prioridade</label>\
 							        </div>\
 								</div>\
 					        </div>\
@@ -459,14 +481,13 @@
 				errorMsg += "Número de processos não pode ser nulo!<br>";
 			} else {
 				for (let i = 0; i < n; i++) {
-					if(!($("#process_"+i+"_start").val()).length || !($("#process_"+i+"_time").val()).length || !($("#process_"+i+"_deadline").val()).length || !($("#process_"+i+"_priority").val()).length) {
+					if(!($("#process_"+i+"_start").val()).length || !($("#process_"+i+"_time").val()).length || !($("#process_"+i+"_deadline").val()).length) {
 						errorMsg += "Dados do processo "+i+" estão incompletos!<br>";
 					} else {
 						data[i] = {
 							"_start"    : parseInt($("#process_"+i+"_start").val()), 
 							"_time"     : parseInt($("#process_"+i+"_time").val()),
 							"_deadline" : parseInt($("#process_"+i+"_deadline").val()),
-							"_priority" : parseInt($("#process_"+i+"_priority").val())
 						};
 					}
 				}
@@ -492,10 +513,10 @@
 				data["algorithm"] = $("input[name=algorithm]:checked", "#main_form").val();
 				data["pageReplacement"] = pageReplacementInput.val();
 				for (let i = 0; i < n; i++) {
-					$("#gantt_inner_info_square_"+i+"_0 span").html(data[i]._start);
-					$("#gantt_inner_info_square_"+i+"_1 span").html(data[i]._time);
-					$("#gantt_inner_info_square_"+i+"_2 span").html(data[i]._deadline);
-					$("#gantt_inner_info_square_"+i+"_3 span").html(i);
+					$("#outer_info_square_"+i+"_0 span").html(data[i]._start);
+					$("#outer_info_square_"+i+"_1 span").html(data[i]._time);
+					$("#outer_info_square_"+i+"_2 span").html(data[i]._deadline);
+					$("#outer_info_square_"+i+"_3 span").html(i);
 				}
 				sortByArrivalTime();
 				main();
@@ -515,18 +536,11 @@
 		$( document ).ready(function() {
 			$('select').formSelect();
 			$('.modal').modal();
-			$('.0-to-9').mask('9');
+			$('.numbers').mask('0#');
 			$('.1-to-9').mask('n', {
 			    translation: {
 			      	'n': {
 			    		pattern: /[1-9]/
-			    	}
-			    }
-			});
-			$('.1-to-5').mask('n', {
-			    translation: {
-			      	'n': {
-			    		pattern: /[1-5]/
 			    	}
 			    }
 			});
@@ -535,11 +549,16 @@
 				ganttGraph.append('\
 					<div class="my-gantt-col">\
 						<div class="my-gantt-square"><span>'+d[i]+'</span></div>\
-						<div id="gantt_inner_info_square_4_'+i+'" class="my-gantt-square"><span></span></div>\
-						<div id="gantt_inner_info_square_3_'+i+'" class="my-gantt-square"><span></span></div>\
-						<div id="gantt_inner_info_square_2_'+i+'" class="my-gantt-square"><span></span></div>\
-						<div id="gantt_inner_info_square_1_'+i+'" class="my-gantt-square"><span></span></div>\
-						<div id="gantt_inner_info_square_0_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_9_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_8_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_7_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_6_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_5_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_4_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_3_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_2_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_1_'+i+'" class="my-gantt-square"><span></span></div>\
+						<div id="outer_info_square_0_'+i+'" class="my-gantt-square"><span></span></div>\
 					</div>\
 				');
 			}
@@ -547,11 +566,16 @@
 				ganttGraph.append('\
 					<div class="my-gantt-col">\
 						<div class="my-gantt-square"><span>'+i+'</span></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_4_'+i+'" class="my-gantt-inner-square"></div></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_3_'+i+'" class="my-gantt-inner-square"></div></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_2_'+i+'" class="my-gantt-inner-square"></div></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_1_'+i+'" class="my-gantt-inner-square"></div></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_9_'+i+'" class="my-gantt-square"><div id="inner_square_9_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_8_'+i+'" class="my-gantt-square"><div id="inner_square_8_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_7_'+i+'" class="my-gantt-square"><div id="inner_square_7_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_6_'+i+'" class="my-gantt-square"><div id="inner_square_6_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_5_'+i+'" class="my-gantt-square"><div id="inner_square_5_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_4_'+i+'" class="my-gantt-square"><div id="inner_square_4_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_3_'+i+'" class="my-gantt-square"><div id="inner_square_3_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_2_'+i+'" class="my-gantt-square"><div id="inner_square_2_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_1_'+i+'" class="my-gantt-square"><div id="inner_square_1_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_0_'+i+'" class="my-gantt-square"><div id="inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
 					</div>\
 				');
 			}
@@ -570,21 +594,20 @@
 
 			for(let i = 0; i < data.length; i++){
 				sortData[i] = {
-							"_start"    : parseInt(data[i]._start), 
-							"_time"     : parseInt(data[i]._time),
-							"_deadline" : parseInt(data[i]._deadline + data[i]._start),
-							"_priority" : parseInt(data[i]._priority),
-							"_timeLeft" : parseInt(data[i]._time),
-							"_processNumber" : parseInt(i),
-							"_makingIO" : parseInt(io),
-							"_endTime"  : parseInt(endTime)
+					"_start"         : parseInt(data[i]._start), 
+					"_time"          : parseInt(data[i]._time),
+					"_deadline"      : parseInt(data[i]._deadline + data[i]._start),
+					"_timeLeft"      : parseInt(data[i]._time),
+					"_processNumber" : parseInt(i),
+					"_makingIO"      : parseInt(io),
+					"_endTime"       : parseInt(endTime)
 				};
 			}
 
-			for(let i = 0; i < sortData.length; i++){
+			for(let i = 0; i < sortData.length; i++) {
 				position = i;
-				for(let j = i+1; j<sortData.length; j++){
-					if(sortData[position]._start > sortData[j]._start){
+				for(let j = i+1; j<sortData.length; j++) {
+					if(sortData[position]._start > sortData[j]._start) {
 						position = j;
 					}
 				}
@@ -608,24 +631,39 @@
 			}
 		}
 
+		function colorizeBorder(y, x) {
+			let square = $("#outer_square_"+y+"_"+x);
+			square.css("border-left-color", "#303f9f");
+		}
+
 		function makeProgressInGanttSquare(y, x, color=green, _delay=(globalDelay+=600)) {
 			if(x == maxGanttGraphCol) {
 				let i = ++maxGanttGraphCol;
 				ganttGraph.append('\
 					<div class="my-gantt-col">\
 						<div class="my-gantt-square"><span>'+i+'</span></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_4_'+i+'" class="my-gantt-inner-square"></div></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_3_'+i+'" class="my-gantt-inner-square"></div></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_2_'+i+'" class="my-gantt-inner-square"></div></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_1_'+i+'" class="my-gantt-inner-square"></div></div>\
-						<div class="my-gantt-square"><div id="gantt_inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_9_'+i+'" class="my-gantt-square"><div id="inner_square_9_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_8_'+i+'" class="my-gantt-square"><div id="inner_square_8_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_7_'+i+'" class="my-gantt-square"><div id="inner_square_7_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_6_'+i+'" class="my-gantt-square"><div id="inner_square_6_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_5_'+i+'" class="my-gantt-square"><div id="inner_square_5_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_4_'+i+'" class="my-gantt-square"><div id="inner_square_4_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_3_'+i+'" class="my-gantt-square"><div id="inner_square_3_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_2_'+i+'" class="my-gantt-square"><div id="inner_square_2_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_1_'+i+'" class="my-gantt-square"><div id="inner_square_1_'+i+'" class="my-gantt-inner-square"></div></div>\
+						<div id="outer_square_0_'+i+'" class="my-gantt-square"><div id="inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
 					</div>\
 				');
 			}
 
-			let square = $("#gantt_inner_square_"+y+"_"+x);
+			if(progressGanttGraphWidth == undefined) {
+				progressGanttGraphWidth = x * 37 + 148;
+			} else {
+				progressGanttGraphWidth += 37;
+			}
+
+			let square = $("#inner_square_"+y+"_"+x);
 			square.css('background-color', color);
-			progressGanttGraphWidth += 37;
 
 			if(progressGanttGraphWidth >= visibleGanttGraphWidth) {
 				ganttGraph.delay(_delay - lastScrollDelay).animate({scrollLeft:scrollPosition}, 400);
@@ -644,6 +682,20 @@
 
 		$( window ).resize(function() {
 			visibleGanttGraphWidth = ganttGraph.width();
+		});
+
+		var oldValue;
+		processNumberInput.on('input', function(event) {
+			var newValue = processNumberInput.val();
+			if(!newValue.length) {
+				oldValue = undefined; 
+			} else if (parseInt(newValue) < 1) {
+				processNumberInput.val(oldValue);
+			} else if (parseInt(newValue) > 10) {
+				processNumberInput.val(oldValue);
+			} else {
+				oldValue = newValue;
+			}
 		});
 
 	</script>
