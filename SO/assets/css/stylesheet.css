@@ -1,3 +1,13 @@
+::-moz-selection {
+    color: #fff;
+    background: #90a4ae;
+}
+
+::selection {
+    color: #fff; 
+    background: #90a4ae;
+}
+
 .my-main-card {
 	position: relative;
 }
