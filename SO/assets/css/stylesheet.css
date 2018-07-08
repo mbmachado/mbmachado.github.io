@@ -8,6 +8,11 @@
     background: #90a4ae;
 }
 
+.my-scrollabel {height: auto; max-height: 100%; overflow-y: visible;}
+@media screen and (min-width: 600px) {
+	.my-scrollabel {height: 100vh; max-height: 100vh; overflow-y: auto;}
+}
+
 .my-main-card {
 	position: relative;
 }
@@ -22,8 +27,16 @@
 	z-index: 3;
 }
 
+.my-no-m-t {
+	margin-top: 0 !important;
+}
+
 .my-no-m-b {
 	margin-bottom: 0 !important;
+}
+
+.my-m-b-10 {
+	margin-bottom: 10px !important;
 }
 
 #processes_info_box {
@@ -45,8 +58,11 @@
 }
 
 .my-inner-overlay {
-	display: none;
+	-moz-box-shadow: 0px 5px 15px -4px rgba(255,255,255,0.3);
+	-webkit-box-shadow: 0px 5px 15px -4px rgba(255,255,255,1);
 	background-color: rgba(255,255,255,0.9);
+	box-shadow: 0px 5px 15px -4px rgba(255,255,255,1);
+	display: none;
 	margin: 20px 20px 0 20px;
 	padding: 20px 0;
 }
@@ -59,7 +75,7 @@
 	outline: none !important;
 }
 
-.my-gantt-graph {
+.my-gantt-graph, .my-mem-graph, .my-hd-graph, .my-pages-graph {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
@@ -69,22 +85,56 @@
 	width: 100%;
 }
 
-.my-gantt-col {
+.my-mem-graph, .my-hd-graph, .my-pages-graph {
+	justify-content: center;
+}
+
+.my-gantt-col, .my-mem-col, .my-hd-col, .my-pages-col {
 	float: left;
 	margin-bottom: 5px;
 	width: 37px;
 }
 
-.my-gantt-col span {
+.my-pages-col {
+	width: 47px;
+}
+
+.my-gantt-col span, .my-mem-col span, .my-hd-col span, .my-pages-col span {
 	margin-left: 2px;
 }
 
+.my-mem-col span:first-child, .my-hd-col span:first-child, .my-pages-col span:first-child {
+	display: block;
+	font-size: 9px;
+}
 
-.my-gantt-square {
-	width: 35px;
+.my-mem-col span ~ span, .my-hd-col span ~ span, .my-pages-col span ~ span {
+	display: block;
+	font-size: 11px;
+}
+
+.my-pages-col span ~ span {
+	font-size: 11px;
+}
+
+.my-gantt-square, .my-mem-square, .my-hd-square, .my-pages-square {
+	width: 37px;
 	height: 37px;
 	border-bottom: 2px solid #cfd8dc; 
 	border-left: 2px solid #cfd8dc;
+}
+
+.my-pages-square {
+	height: 47px;
+	width: 47px;
+}
+
+.my-r-b {
+	border-right: 2px solid #cfd8dc;
+}
+
+.my-t-b {
+	border-top: 2px solid #cfd8dc;
 }
 
 .my-gantt-inner-square {
@@ -129,4 +179,14 @@
 	height: 25px;
 	margin-right: 5px;
 	width: 2px;
+}
+
+.draggable {
+	cursor: pointer;
+	position: fixed;
+	z-index: 1000;
+}
+
+#toggle_container {
+	display: none;
 }

@@ -12,11 +12,11 @@
 </head>
 <body class="blue-grey lighten-5">
 	<div class="row my-no-m-b">
-		<div class="col s12 m3 l3 teal lighten-2">
+		<div class="col s12 m3 l3 teal lighten-2 my-scrollabel">
 			<div class="row my-no-m-b">
 				<div class="col s12">
-					<h5 class="center-align blue-grey-text text-lighten-5">Escalonador de Processos</h5>
-					<p class="center-align blue-grey-text text-lighten-5">By Enrique W., Mateus B. e Mateus C.</p>
+					<h5 class="center-align blue-grey-text text-lighten-5 my-no-m-b">Escalonador de Processos</h5>
+					<p class="center-align blue-grey-text text-lighten-5 my-no-m-t my-m-b-10">By Enrique W., Mateus B. e Mateus C.</p>
 				</div>
 			</div>
 			<div class="row">
@@ -45,13 +45,13 @@
 							</div>
 						</div>
 						<form id="main_form" action="#" method="POST">
-							<div class="row">
+							<div class="row my-no-m-b">
 								<div class="input-field col s12">
 						        	<input id="process_number" type="text" class="numbers" autocomplete="off">
 						        	<label class="truncate" for="process_number">Número de Processos</label>
 						        </div>
 							</div>
-							<div class="row">
+							<div class="row my-no-m-b">
 								<div class="input-field col s6">
 						        	<input id="quamtum_number" type="text" class="1-to-9" autocomplete="off">
 						        	<label for="quamtum_number">Quamtum</label>
@@ -61,7 +61,7 @@
 						        	<label for="overload_number">Sobrecarga</label>
 						        </div>
 							</div>
-							<div class="row">
+							<div class="row my-no-m-b">
 								<div class="input-field col s12">
 									<select id="page_replacement">
 										<option value="FIFO" selected>FIFO</option>
@@ -70,7 +70,7 @@
 									<label>Substituição de Páginas</label>
 								</div>
 							</div>
-							<div class="row">
+							<div class="row my-no-m-b">
 								<div class="col s12">
 									<label>Algoritmo de escalonamento</label>
 									<p>
@@ -112,7 +112,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="col s12 m9 l9 blue-grey lighten-5">
+		<div class="col s12 m9 l9 blue-grey lighten-5 my-scrollabel">
 			<div id="processes_info_box" class="row"></div>
 			<div id="graphs_box" class="row">
 				<div class="col s12">
@@ -140,7 +140,7 @@
 								<div class="my-subtitle-line indigo darken-2"></div>
 								<label>DeadLine</label>
 							</div>
-							<div class="col s6 m4">
+							<div class="col s12 m4">
 								<div class="switch right-align my-switch">
 								    <label>
 								    	Rolagem automática
@@ -152,23 +152,50 @@
 						</div>
 					</div>
 				</div>
-				<div class="col s12 m4">
-					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
-						<h6>Memória RAM</h6>
-					</div>
-				</div>
-				<div class="col s12 m4">
-					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
-						<h6>Disco</h6>
-					</div>
-				</div>
-				<div class="col s12 m4">
-					<div class="card-panel teal lighten-2 blue-grey-text text-lighten-5">
-						<h6>Tabela de Páginas</h6>
+				<div class="col s12">
+					<div class="row">
+						<div class="col s12 m6">
+							<div class="card-panel">
+								<div class="row">
+									<div  class="col s12">
+										<h6>Memória RAM</h6>
+									</div>
+								</div>
+								<div id="mem_graph" class="my-mem-graph"></div>
+							</div>
+						</div>
+						<div class="col s12 m6">
+							<div class="card-panel">
+								<div class="row">
+									<div class="col s12">
+										<h6>Disco</h6>
+									</div>
+								</div>
+								<div id="hd_graph" class="my-hd-graph"></div>
+							</div>
+						</div>
+						<div id="draggable_pages_table" class="col s12 m5 draggable resizable">
+							<div class="card">
+								<div class="card-content">
+									<div class="row">
+										<div class="col s6">
+											<h6>Tabela de Páginas</h6>
+										</div>
+										<div class="col s6">
+											<a id="hide_btn" class="waves-effect waves-red btn-flat right"><i class="material-icons">close</i></a>
+										</div>
+									</div>
+									<div id="pages_graph" class="my-pages-graph"></div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
+    </div>
+    <div id="toggle_container" class="fixed-action-btn">
+    	<a id="toggle_btn" href="#" class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">library_books</i></a>
     </div>
     <div id="error_modal" class="modal">
 	    <div class="modal-content">
@@ -180,8 +207,9 @@
 	    </div>
   	</div>
 	<script src="assets/vendor/jQuery/jquery-3.3.1.min.js"></script>
-	<script src="assets/vendor/velocity/velocity.min.js"></script>
+	<script src="assets/vendor/jQuery-ui-1.12.1/jquery-ui.min.js"></script>
 	<script src="assets/vendor/jQuery-Mask-Plugin/dist/jquery.mask.min.js"></script>
+	<script src="assets/vendor/velocity/velocity.min.js"></script>
 	<script src="assets/vendor/materialize/js/materialize.min.js"></script>
 	<script src="assets/js/script.js"></script>
 	<script>
@@ -220,6 +248,14 @@
 		var grey = "#90a4ae";
 		var colors = ["#4db6ac", "#e57373", "#90a4ae"];
 
+		var memGraph = $("#mem_graph");
+		var hdGraph = $("#hd_graph");
+		var pagesGraph = $("#pages_graph");
+		var pagesTable = $('#draggable_pages_table');
+		var hideBtn = $("#hide_btn");
+		var	toggleBtn = $("#toggle_btn");
+		var	toggleContainer = $("#toggle_container");
+
 		function choiceProcess(actualTime) {
 			var minDeadline = extremeDeadline;
 			for(let j=0; j<sortData.length; j++){
@@ -251,11 +287,11 @@
             var next;
             
             for(let i=0; i < sortData.length; i++) {
-                if(lastPosition < sortData[i]._start){
+                if(lastPosition < sortData[i]._start) {
 					lastPosition = sortData[i]._start;
 				}
                 for (count; count < sortData.length; count++) {
-                    if (sortData[count]._start <= lastPosition){
+                    if (sortData[count]._start <= lastPosition) {
                         onTime[count] = count;
                     }else{
                         break;
@@ -266,7 +302,7 @@
                     if (onTime[j] == -1){ continue; }
                     if (next == null){
                         next = j;
-                    }else if (sortData[j]._time < sortData[next]._time){
+                    }else if (sortData[j]._time < sortData[next]._time) {
                         next = j;
                     }
                 }
@@ -321,7 +357,7 @@
                         makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
                         lastPosition++;
                     }
-                    if(nextIsOver){
+                    if(nextIsOver) {
                         sortData[currentProcess]._endTime = lastPosition;
                         for (;count < sortData.length; count++) {
                             if (sortData[count]._start <= lastPosition) {
@@ -333,13 +369,13 @@
                         if (spinning.length <= 0){
                             spinningIsOver = true;
                         }
-                    }else{
-                        for(let j = 0; j < data["overload"]; j++){
+                    }else {
+                        for(let j = 0; j < data["overload"]; j++) {
                             makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
                             lastPosition++;
                         }
-                        for (; count < sortData.length; count++){
-                            if (sortData[count]._start <= lastPosition){
+                        for (; count < sortData.length; count++) {
+                            if (sortData[count]._start <= lastPosition) {
                                 spinning.push(count);
                             }else{
                                 break;
@@ -412,6 +448,59 @@
 			return turnAround/sortData.length;
 		}
 
+		function setProcessInRAM(framePage, _process) {
+			let square = $("#mem_page_"+framePage);
+			let element = $("#mem_page_"+framePage+" span ~ span");
+			
+			square.css('background-color', '#b2dfdb');
+			element.html('P '+_process);
+		}
+
+		function removeProcessFromRAM(framePage) {
+			let square = $("#mem_page_"+framePage);
+			let element = $("#mem_page_"+framePage+" span ~ span");
+			
+			square.css('background-color', '#fff');
+			element.html('P x');
+		}
+
+		function setProcessInHD(local, _process) {
+			let square = $("#hd_page_"+local);
+			let element = $("#hd_page_"+local+" span ~ span");
+			
+			square.css('background-color', '#b2dfdb');
+			element.html('P '+_process);
+		}
+
+		function removeProcessFromHD(local) {
+			let square = $("#hd_page_"+local);
+			let element = $("#hd_page_"+local+" span ~ span");
+			
+			square.css('background-color', '#fff');
+			element.html('P x');
+		}
+
+		function setTablePages(virtualPage, framePage) {
+			let square = $("#pages_page_"+virtualPage);
+			let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
+			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
+
+			square.css('background-color', '#b2dfdb');
+			element.html('F '+framePage);
+			_element.html('Bit 1');
+		}
+
+		function resetTablePages(virtualPage) {
+			let square = $("#pages_page_"+virtualPage);
+			let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
+			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
+
+			square.css('background-color', '#fff');
+
+			element.html('F x');
+			_element.html('Bit 0');
+		}
+
 		function main() {
 			
 			switch (data["algorithm"]) {
@@ -431,6 +520,10 @@
 			    	window.alert("Erro Fatal");
        				break;
 			}
+
+			setProcessInRAM(2, 0);
+			setProcessInHD(2, 0);
+			setTablePages(2, 2);
 
 			setTimeout(function() { 
 				progressBar.fadeOut('fast');
@@ -534,6 +627,10 @@
 		});
 
 		$( document ).ready(function() {
+			$(function() {
+				$('.draggable').draggable();
+				//$('.resizable').resizable();
+			});
 			$('select').formSelect();
 			$('.modal').modal();
 			$('.numbers').mask('0#');
@@ -578,6 +675,115 @@
 						<div id="outer_square_0_'+i+'" class="my-gantt-square"><div id="inner_square_0_'+i+'" class="my-gantt-inner-square"></div></div>\
 					</div>\
 				');
+			}
+
+			for (let i = 0, j = 1; i < 10; i++) {
+				if(j < 51) {
+					var t = "blue-grey-text";
+				} else {
+					var t = "red-text text-lighten-2"
+				}
+				if (!(i==9)) {
+					memGraph.append('\
+						<div class="my-mem-col">\
+							<div id="mem_page_'+j+'" class="my-mem-square my-t-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+						</div>\
+					');
+				} else {
+					memGraph.append('\
+						<div class="my-mem-col">\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b my-t-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="mem_page_'+j+'" class="my-mem-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+						</div>\
+					');
+				}
+			}
+
+			for (let i = 0, j = 1; i < 10; i++) {
+				var t = "blue-grey-text";
+				if (!(i==9)) {
+					hdGraph.append('\
+						<div class="my-hd-col">\
+							<div id="hd_page_'+j+'" class="my-hd-square my-t-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+						</div>\
+					');
+				} else {
+					hdGraph.append('\
+						<div class="my-hd-col">\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b my-t-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+							<div id="hd_page_'+j+'" class="my-hd-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>P x</span></div>\
+						</div>\
+					');
+				}
+			}
+
+			for (let i = 0, j = 1; i < 10; i++) {
+				var t = "blue-grey-text";
+				if (!(i==9)) {
+					pagesGraph.append('\
+						<div class="my-pages-col">\
+							<div id="pages_page_'+j+'" class="my-pages-square my-t-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+						</div>\
+					');
+				} else {
+					pagesGraph.append('\
+						<div class="my-pages-col">\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b my-t-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+							<div id="pages_page_'+j+'" class="my-pages-square my-r-b"><span class="'+t+'">'+(j++)+'</span><span>F x</span><span>Bit 0</span></div>\
+						</div>\
+					');
+				}
 			}
 		});
 
@@ -657,7 +863,7 @@
 			}
 
 			if(progressGanttGraphWidth == undefined) {
-				progressGanttGraphWidth = x * 37 + 148;
+				progressGanttGraphWidth = x * 37 + 185;
 			} else {
 				progressGanttGraphWidth += 37;
 			}
@@ -696,6 +902,18 @@
 			} else {
 				oldValue = newValue;
 			}
+		});
+
+		hideBtn.on('click', function(event) {
+			event.preventDefault();
+			pagesTable.toggle();
+			toggleContainer.toggle();
+		});
+
+		toggleBtn.on('click', function(event) {
+			event.preventDefault();
+			pagesTable.toggle();
+			toggleContainer.toggle();
 		});
 
 	</script>
