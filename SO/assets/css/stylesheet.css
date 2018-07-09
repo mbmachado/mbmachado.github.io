@@ -85,8 +85,10 @@
 	width: 100%;
 }
 
-.my-mem-graph, .my-hd-graph, .my-pages-graph {
-	justify-content: center;
+@media screen and (min-width: 600px) {
+	.my-mem-graph, .my-hd-graph, .my-pages-graph {
+		justify-content: center;
+	}
 }
 
 .my-gantt-col, .my-mem-col, .my-hd-col, .my-pages-col {
@@ -189,4 +191,14 @@
 
 #toggle_container {
 	display: none;
+}
+
+.my-s-m-b-5 {
+	margin-bottom: 0;
+}
+
+@media screen and (max-width: 600px) {
+	.my-s-m-b-5 {
+		margin-bottom: 5px;
+	}
 }
