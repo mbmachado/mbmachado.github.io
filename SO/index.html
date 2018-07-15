@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	<title>Escalonador de Processos</title>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+	<link rel="stylesheet" href="assets/vendor/jQuery-ui-1.12.1/jquery-ui.min.css">
 	<link rel="stylesheet" href="assets/vendor/materialize/css/materialize.min.css">
 	<link rel="stylesheet" href="assets/css/stylesheet.css">
 	<link rel="icon" href="assets/img/favicon.png">
@@ -174,26 +175,27 @@
 								<div id="hd_graph" class="my-hd-graph"></div>
 							</div>
 						</div>
-						<div id="draggable_pages_table" class="col s12 m5 draggable resizable">
-							<div class="card">
-								<div class="card-content">
-									<div class="row">
-										<div class="col s6">
-											<h6>Tabela de Páginas</h6>
-										</div>
-										<div class="col s6">
-											<a id="hide_btn" class="waves-effect waves-red btn-flat right"><i class="material-icons">close</i></a>
-										</div>
-									</div>
-									<div id="pages_graph" class="my-pages-graph"></div>
-								</div>
-							</div>
-						</div>
+						
 					</div>
 				</div>
 			</div>
 		</div>
     </div>
+    <div id="draggable_pages_table" class="draggable resizable ui-widget-content">
+		<div class="card">
+			<div class="card-content">
+				<div class="row">
+					<div class="col s6 my-no-p">
+						<h6>Tabela de Páginas</h6>
+					</div>
+					<div class="col s6 my-no-p">
+						<a id="hide_btn" class="waves-effect waves-red btn-flat right"><i class="material-icons">close</i></a>
+					</div>
+				</div>
+				<div id="pages_graph" class="my-pages-graph"></div>
+			</div>
+		</div>
+	</div>
     <div id="toggle_container" class="fixed-action-btn">
     	<a id="toggle_btn" href="#" class="btn-floating btn-large waves-effect waves-light"><i class="material-icons">library_books</i></a>
     </div>
@@ -481,23 +483,26 @@
 		}
 
 		function setTablePages(virtualPage, framePage) {
-			let square = $("#pages_page_"+virtualPage);
 			let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
-			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
-
-			square.css('background-color', '#b2dfdb');
 			element.html('F '+framePage);
-			_element.html('Bit 1');
 		}
 
 		function resetTablePages(virtualPage) {
-			let square = $("#pages_page_"+virtualPage);
 			let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
-			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
-
-			square.css('background-color', '#fff');
-
 			element.html('F x');
+		}
+
+		function setTablePagesBit(virtualPage, framePage) {
+			let square = $("#pages_page_"+virtualPage);
+			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
+			square.css('background-color', '#b2dfdb');
+			_element.html('Bit 1');
+		}
+
+		function resetTablePagesBit(virtualPage) {
+			let square = $("#pages_page_"+virtualPage);
+			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
+			square.css('background-color', '#fff');
 			_element.html('Bit 0');
 		}
 
@@ -626,11 +631,12 @@
 			});
 		});
 
+		$(function() {
+			$('.draggable').draggable();
+			$('.resizable').resizable();
+		});
+
 		$( document ).ready(function() {
-			$(function() {
-				$('.draggable').draggable();
-				//$('.resizable').resizable();
-			});
 			$('select').formSelect();
 			$('.modal').modal();
 			$('.numbers').mask('0#');
@@ -798,7 +804,7 @@
 			var processNumber;
 			var endTime=0;
 
-			for(let i = 0; i < data.length; i++){
+			for(let i = 0; i < data.length; i++) {
 				sortData[i] = {
 					"_start"         : parseInt(data[i]._start), 
 					"_time"          : parseInt(data[i]._time),
@@ -888,6 +894,15 @@
 
 		$( window ).resize(function() {
 			visibleGanttGraphWidth = ganttGraph.width();
+		});
+
+		pagesTable.resize(function() {
+			let width = pagesTable.width();
+			if(width > 520) {
+				pagesGraph.css('justify-content', 'center');
+			} else {
+				pagesGraph.css('justify-content', 'flex-start');
+			}
 		});
 
 		var oldValue;

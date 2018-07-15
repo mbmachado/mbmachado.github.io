@@ -85,7 +85,7 @@
 	width: 100%;
 }
 
-.my-mem-graph, .my-hd-graph, .my-pages-graph {
+.my-mem-graph, .my-hd-graph {
 	justify-content: center;
 }
 
@@ -181,10 +181,19 @@
 	width: 2px;
 }
 
-.draggable {
+#draggable_pages_table {
+	box-sizing: border-box;
 	cursor: pointer;
+	height: auto;
 	position: fixed;
+	right: 20px;
+	top: 5px;
+	width: 520px;
 	z-index: 1000;
+}
+
+.my-no-p {
+	padding: 0 !important;
 }
 
 #toggle_container {
