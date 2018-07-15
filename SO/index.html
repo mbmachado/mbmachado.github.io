@@ -100,7 +100,7 @@
 									</p>
 								</div>
 							</div>
-							<div class="row">
+							<div class="row my-no-m-b">
 								<div class="col s6 m4">
 									<button class="btn waves-effect waves-light" type="submit" name="action">Iniciar</button>
 								</div>
@@ -125,19 +125,19 @@
 						</div>
 						<div id="gantt_graph" class="my-gantt-graph"></div>
 						<div class="row">
-							<div class="col s6 m2 valign-wrapper">
+							<div class="col s6 m2 valign-wrapper my-s-m-b-5">
 								<div class="my-subtitle-square teal lighten-2"></div>
 								<label>Executando</label>
 							</div>
-							<div class="col s6 m2 valign-wrapper">
-								<div class="my-subtitle-square  red lighten-2"></div>
+							<div class="col s6 m2 valign-wrapper my-s-m-b-5">
+								<div class="my-subtitle-square red lighten-2"></div>
 								<label>Sobrecarga</label>
 							</div>
-							<div class="col s6 m2 valign-wrapper">
+							<div class="col s6 m2 valign-wrapper my-s-m-b-5">
 								<div class="my-subtitle-square blue-grey lighten-2"></div>
 								<label>Estouro DL</label>
 							</div>
-							<div class="col s6 m2 valign-wrapper">
+							<div class="col s6 m2 valign-wrapper my-s-m-b-5">
 								<div class="my-subtitle-line indigo darken-2"></div>
 								<label>DeadLine</label>
 							</div>
@@ -237,7 +237,7 @@
 		var visibleGanttGraphWidth = ganttGraph.width();
 		var progressGanttGraphWidth;
 		var maxGanttGraphCol = 30;
-		var scrollPosition = 70;
+		var scrollPosition = 65;
 		var lastScrollDelay = 0;
 
 		var errorModal = $("#error_modal");
@@ -529,6 +529,7 @@
 			setProcessInRAM(2, 0);
 			setProcessInHD(2, 0);
 			setTablePages(2, 2);
+			setTablePagesBit(2, 2);
 
 			setTimeout(function() { 
 				progressBar.fadeOut('fast');
@@ -602,7 +603,6 @@
 				data["overload"] = parseInt(overloadNumberInput.val()); 
 			}
 			if(!(errorMsg).length) {
-				$("html").animate({scrollTop:0}, 500);
 				processesInfoBox.hide(0, function(){
 					graphsBox.show('fast');
 					progressBar.show('fast');
@@ -880,7 +880,7 @@
 			if(progressGanttGraphWidth >= visibleGanttGraphWidth) {
 				ganttGraph.delay(_delay - lastScrollDelay).animate({scrollLeft:scrollPosition}, 400);
 				lastScrollDelay = _delay;
-				scrollPosition += 70;
+				scrollPosition += 65;
 			}
 
 			square.velocity({width: "100%"}, {duration:600, delay: _delay, mobileHA: false});
