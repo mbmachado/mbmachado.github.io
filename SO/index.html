@@ -400,8 +400,8 @@
 			var endOneProcess = 0;
 			var proc = 0;
 
-			for (var i = 0; i < data.length; i++) {
-				colorizeBorder(i, data[i]._deadline + data[i]._start);
+			for (var i = 0; i < sortData.length; i++) {
+				colorizeBorder(sortData[i]._processNumber, sortData[i]._deadline);
 			}
 
 			while(finhishedProcess < allProcess) {
@@ -450,17 +450,17 @@
 			return turnAround/sortData.length;
 		}
 
-		function setProcessInRAM(framePage, _process) {
-			let square = $("#mem_page_"+framePage);
-			let element = $("#mem_page_"+framePage+" span ~ span");
+		function setProcessInRAM(pageFrame, _process) {
+			let square = $("#mem_page_"+pageFrame);
+			let element = $("#mem_page_"+pageFrame+" span ~ span");
 			
 			square.css('background-color', '#b2dfdb');
 			element.html('P '+_process);
 		}
 
-		function removeProcessFromRAM(framePage) {
-			let square = $("#mem_page_"+framePage);
-			let element = $("#mem_page_"+framePage+" span ~ span");
+		function removeProcessFromRAM(pageFrame) {
+			let square = $("#mem_page_"+pageFrame);
+			let element = $("#mem_page_"+pageFrame+" span ~ span");
 			
 			square.css('background-color', '#fff');
 			element.html('P x');
@@ -482,9 +482,9 @@
 			element.html('P x');
 		}
 
-		function setTablePages(virtualPage, framePage) {
+		function setTablePages(virtualPage, pageFrame) {
 			let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
-			element.html('F '+framePage);
+			element.html('F '+pageFrame);
 		}
 
 		function resetTablePages(virtualPage) {
@@ -492,7 +492,7 @@
 			element.html('F x');
 		}
 
-		function setTablePagesBit(virtualPage, framePage) {
+		function setTablePagesBit(virtualPage, pageFrame) {
 			let square = $("#pages_page_"+virtualPage);
 			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
 			square.css('background-color', '#b2dfdb');
