@@ -400,8 +400,8 @@
 			var endOneProcess = 0;
 			var proc = 0;
 
-			for (var i = 0; i < sortData.length; i++) {
-				colorizeBorder(i, sortData[i]._deadline);
+			for (var i = 0; i < data.length; i++) {
+				colorizeBorder(i, data[i]._deadline + data[i]._start);
 			}
 
 			while(finhishedProcess < allProcess) {
@@ -532,6 +532,7 @@
 			setTablePagesBit(2, 2);
 
 			setTimeout(function() { 
+				ganttGraph.stop('fx', true, false);
 				progressBar.fadeOut('fast');
 				meanTurnaroundSpan.html(meanTurnAround()+" min");
 				innerOverlayPanel.show('fast');
