@@ -217,9 +217,11 @@
 	<script>
 		"use strict";
 		var data;
+		var ioWait=[];
 		var sortData;
 		var currentProcess;
 		var extremeDeadline = 1000000;
+		var freeMemory, freeHd;
 		var mainForm = $("#main_form");
 		var processNumberInput = $("#process_number");
 		var quamtumNumberInput = $("#quamtum_number");
@@ -260,14 +262,138 @@
 
 		function choiceProcess(actualTime) {
 			var minDeadline = extremeDeadline;
+			var marcado=0;
 			for(let j=0; j<sortData.length; j++){
-				if(sortData[j]._start <= actualTime && sortData[j]._timeLeft > 0 && sortData[j]._deadline < minDeadline){
-					minDeadline = sortData[j]._deadline;
-					currentProcess = j;
+				if(sortData[j]._start <= actualTime && sortData[j]._timeLeft > 0 && sortData[j]._deadline < minDeadline && sortData[j]._makingIO==0){
+
+					if(sortData[j]._memoria==-1 && freeMemory>0){
+						minDeadline = sortData[j]._deadline;
+						currentProcess = j;
+						marcado=1;
+					}else if(sortData[j]._memoria==-1){
+						sortData[j]._makingIO=1;
+						//colocar na memoria
+					}else{
+						minDeadline = sortData[j]._deadline;
+						currentProcess = j;
+						marcado=1;
+					}
 				}	
+			}
+			if(sortData[j]._memoria==-1 && freeMemory>0){
+				putMemoryWIthFreeSpace(currentProcess);
+			}
+		}
+
+		function remJustHD(pro){
+			var ini=sortData[proc]._hd*10+1;
+			sortData[proc]._hd=-1;
+			for(let i=0; i<10; i++){
+				removeProcessFromRAM(ini+i);
+			}
+			freeMemory++;
+		}	
+
+		function remJustRAM(pro){
+			var ini=sortData[proc]._memoria*10+1;
+			sortData[proc]._memoria=-1;
+			for(let i=0; i<10; i++){
+				removeProcessFromRAM(ini+i);
+			}
+			freeMemory++;
+		}		
+
+		function putJustInRAM(proc, col){
+			var ini=col*10+1;
+			sortData[proc]._memoria=col;
+			for(let i=0; i<10; i++){
+				setProcessInRAM(ini+i, sortData[proc]._processNumber);
 			}
 		}
 		
+		function putMemoryWIthFreeSpace(proc){
+			if(sortData[proc]._hd==-1){
+				sortData[proc]._hd=10-freeHd;
+				var ini = (10-freeHd)*10+1;
+				for(let i=0; i<10; i++){
+					setProcessInHD(ini+i, sortData[proc]._processNumber);
+				}
+				freeHd--;
+			}
+			ini=5-freeMemory*10+1;
+			sortData[proc]._memoria=5-freeMemory;
+			freeMemory--;
+			for(let i=0; i<10; i++){
+				setProcessInRAM(ini+i, sortData[proc]._processNumber);
+			}
+		}
+
+		function choiceProcess2(actualTime){
+			var marcado=0;
+			currentProcess=-1;
+			for(let i=0; i<sortData.length; i++){
+				if(sortData[i]._start <= actualTime && marcado==0 && sortData[i]._makingIO==0 && sortData[i]._timeLeft>0){
+					if(sortData[i]._memoria==-1 && freeMemory>0){
+						putMemoryWIthFreeSpace(i);
+						marcado=1;
+						currentProcess=i;
+					}else if(sortData[i]._memoria==-1){
+						sortData[i]._makingIO=1;
+						//colocar na memoria
+					}else{
+						marcado=1;
+						currentProcess=i;
+					}
+				}
+			}
+		}
+
+		function choiceProcessSJF(actualTime){
+			var marcado=0;
+			currentProcess=-1;
+			var procAux=10000000000000;
+			for(let i=0; i<sortData.length; i++){
+				if(sortData[i]._start <= actualTime && sortData[i]._makingIO==0 && sortData[i]._timeLeft>0 && sortData[i]._time < procAux){
+					if(sortData[i]._memoria==-1 && freeMemory>0){
+						putMemoryWIthFreeSpace(i);
+						currentProcess=i
+						procAux = sortData[i]._time;
+					}else if(sortData[i]._memoria==-1){
+						sortData[i]._makingIO=1;
+						//colocar na memoria
+					}else{
+						currentProcess=i
+						procAux = sortData[i]._time;
+					}
+				}
+			}	
+		}
+
+
+		function fifo2(){
+			var lastPosition = 0;
+			var i = 0;
+			var tam = sortData.length;
+			while(i < tam){
+				currentProcess = -1;
+				choiceProcess2(lastPosition);
+				while(currentProcess == -1){
+					lastPosition++;
+					choiceProcess2(lastPosition);
+				}
+				for(let j=0; j<sortData[i]._time; j++) {
+					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
+					lastPosition++;
+				}
+				sortData[currentProcess]._endTime=lastPosition;
+				sortData[currentProcess]._timeLeft=0;
+				remJustRAM(currentProcess);
+				remJustHD(currentProcess);
+				i++;
+			}
+		}
+
+
 		function fifo() {
 			var lastPosition = 0;
 			for(let i= 0; i < sortData.length; i++) {
@@ -284,38 +410,26 @@
         
         function sjf() {
 			var lastPosition = 0;
-            var onTime = [];
-            var count = 0;
-            var next;
-            
-            for(let i=0; i < sortData.length; i++) {
-                if(lastPosition < sortData[i]._start) {
-					lastPosition = sortData[i]._start;
+			var lastPosition = 0;
+			var i = 0;
+			var tam = sortData.length;
+			while(i < tam){
+				currentProcess = -1;
+				choiceProcessSJF(lastPosition);
+				while(currentProcess == -1){
+					lastPosition++;
+					choiceProcess2(lastPosition);
 				}
-                for (count; count < sortData.length; count++) {
-                    if (sortData[count]._start <= lastPosition) {
-                        onTime[count] = count;
-                    }else{
-                        break;
-                    }
-                }
-                next = null;
-                for (let j=0; j < onTime.length; j++) {
-                    if (onTime[j] == -1){ continue; }
-                    if (next == null){
-                        next = j;
-                    }else if (sortData[j]._time < sortData[next]._time) {
-                        next = j;
-                    }
-                }
-                onTime[next] = -1;
-
-                for(let j=0; j<sortData[next]._time; j++) {
-                    makeProgressInGanttSquare(sortData[next]._processNumber, lastPosition);
-                    lastPosition++;
-                }
-                sortData[next]._endTime = lastPosition;
-            }
+				for(let j=0; j<sortData[i]._time; j++) {
+					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
+					lastPosition++;
+				}
+				sortData[currentProcess]._endTime=lastPosition;
+				sortData[currentProcess]._timeLeft=0;
+				remJustRAM(currentProcess);
+				remJustHD(currentProcess);
+				i++;
+			}            
 		}
         
         function roundRobin() {
@@ -399,7 +513,6 @@
 			var timeAfterDeadline;
 			var endOneProcess = 0;
 			var proc = 0;
-
 			for (var i = 0; i < sortData.length; i++) {
 				colorizeBorder(sortData[i]._processNumber, sortData[i]._deadline);
 			}
@@ -433,6 +546,8 @@
 				if(endOneProcess == 1){
 					finhishedProcess++;
 					sortData[currentProcess]._endTime = lastPosition;
+					remJustHD(currentProcess);
+					remJustRAM(currentProcess);
 				}else { 
 					for(let j = 0; j < data["overload"]; j++) {
 						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
@@ -507,10 +622,11 @@
 		}
 
 		function main() {
-			
+			freeMemory=5;
+			freeHd=10;
 			switch (data["algorithm"]) {
 			    case "FIFO":
-			        fifo(); 
+			        fifo2(); 
 			        break;
 			    case "SJF":
 			        sjf();
@@ -526,17 +642,18 @@
        				break;
 			}
 
-			setProcessInRAM(2, 0);
+		/*	setProcessInRAM(2, 0);
 			setProcessInHD(2, 0);
 			setTablePages(2, 2);
 			setTablePagesBit(2, 2);
-
+		*/
 			setTimeout(function() { 
 				ganttGraph.stop('fx', true, false);
 				progressBar.fadeOut('fast');
 				meanTurnaroundSpan.html(meanTurnAround()+" min");
 				innerOverlayPanel.show('fast');
 			}, globalDelay );
+		
 		}
 
 		processNumberInput.on('change', function(event) {
@@ -804,6 +921,7 @@
 			var io = 0;
 			var processNumber;
 			var endTime=0;
+			var hd1=-1;
 
 			for(let i = 0; i < data.length; i++) {
 				sortData[i] = {
@@ -813,7 +931,9 @@
 					"_timeLeft"      : parseInt(data[i]._time),
 					"_processNumber" : parseInt(i),
 					"_makingIO"      : parseInt(io),
-					"_endTime"       : parseInt(endTime)
+					"_endTime"       : parseInt(endTime),
+					"_memoria"		 : parseInt(hd1),
+					"_hd"			 : parseInt(hd1)
 				};
 			}
 
