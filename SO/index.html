@@ -320,7 +320,7 @@
 				}
 				freeHd--;
 			}
-			ini=5-freeMemory*10+1;
+			ini=(5-freeMemory)*10+1;
 			sortData[proc]._memoria=5-freeMemory;
 			freeMemory--;
 			for(let i=0; i<10; i++){
@@ -387,8 +387,8 @@
 				}
 				sortData[currentProcess]._endTime=lastPosition;
 				sortData[currentProcess]._timeLeft=0;
-				remJustRAM(currentProcess);
-				remJustHD(currentProcess);
+				//remJustRAM(currentProcess);
+				//remJustHD(currentProcess);
 				i++;
 			}
 		}
@@ -426,8 +426,8 @@
 				}
 				sortData[currentProcess]._endTime=lastPosition;
 				sortData[currentProcess]._timeLeft=0;
-				remJustRAM(currentProcess);
-				remJustHD(currentProcess);
+				//remJustRAM(currentProcess);
+				//remJustHD(currentProcess);
 				i++;
 			}            
 		}
