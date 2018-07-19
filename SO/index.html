@@ -572,7 +572,7 @@
 				
 				square.css('background-color', '#b2dfdb');
 				element.html('P '+_process);
-			}, globalDelay);
+			}, globalDelay + 600);
 		}
 
 		function removeProcessFromRAM(pageFrame) {
@@ -582,7 +582,7 @@
 				
 				square.css('background-color', '#fff');
 				element.html('P x');
-			}, globalDelay);
+			}, globalDelay + 600);
 		}
 
 		function setProcessInHD(local, _process) {
@@ -592,7 +592,7 @@
 				
 				square.css('background-color', '#b2dfdb');
 				element.html('P '+_process);
-			}, globalDelay);
+			}, globalDelay + 600);
 		}
 
 		function removeProcessFromHD(local) {
@@ -602,21 +602,21 @@
 				
 				square.css('background-color', '#fff');
 				element.html('P x');
-			}, globalDelay);
+			}, globalDelay + 600);
 		}
 
 		function setTablePages(virtualPage, pageFrame) {
 			setTimeout(function(){
 				let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
 				element.html('F '+pageFrame);
-			}, globalDelay);
+			}, globalDelay + 600);
 		}
 
 		function resetTablePages(virtualPage) {
 			setTimeout(function(){
 				let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
 				element.html('F x');
-			}, globalDelay);
+			}, globalDelay + 600);
 		}
 
 		function setTablePagesBit(virtualPage, pageFrame) {
@@ -625,7 +625,7 @@
 				let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
 				square.css('background-color', '#b2dfdb');
 				_element.html('Bit 1');
-			}, globalDelay);
+			}, globalDelay + 600);
 		}
 
 		function resetTablePagesBit(virtualPage) {
@@ -634,7 +634,7 @@
 				let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
 				square.css('background-color', '#fff');
 				_element.html('Bit 0');
-			}, globalDelay);
+			}, globalDelay + 600);
 		}
 
 		function main() {
@@ -663,7 +663,7 @@
 				progressBar.fadeOut('fast');
 				meanTurnaroundSpan.html(meanTurnAround()+" min");
 				innerOverlayPanel.show('fast');
-			}, globalDelay );
+			}, globalDelay + 600);
 		
 		}
 
