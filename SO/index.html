@@ -566,59 +566,75 @@
 		}
 
 		function setProcessInRAM(pageFrame, _process) {
-			let square = $("#mem_page_"+pageFrame);
-			let element = $("#mem_page_"+pageFrame+" span ~ span");
-			
-			square.css('background-color', '#b2dfdb');
-			element.html('P '+_process);
+			setTimeout(function(){
+				let square = $("#mem_page_"+pageFrame);
+				let element = $("#mem_page_"+pageFrame+" span ~ span");
+				
+				square.css('background-color', '#b2dfdb');
+				element.html('P '+_process);
+			}, globalDelay);
 		}
 
 		function removeProcessFromRAM(pageFrame) {
-			let square = $("#mem_page_"+pageFrame);
-			let element = $("#mem_page_"+pageFrame+" span ~ span");
-			
-			square.css('background-color', '#fff');
-			element.html('P x');
+			setTimeout(function(){
+				let square = $("#mem_page_"+pageFrame);
+				let element = $("#mem_page_"+pageFrame+" span ~ span");
+				
+				square.css('background-color', '#fff');
+				element.html('P x');
+			}, globalDelay);
 		}
 
 		function setProcessInHD(local, _process) {
-			let square = $("#hd_page_"+local);
-			let element = $("#hd_page_"+local+" span ~ span");
-			
-			square.css('background-color', '#b2dfdb');
-			element.html('P '+_process);
+			setTimeout(function(){
+				let square = $("#hd_page_"+local);
+				let element = $("#hd_page_"+local+" span ~ span");
+				
+				square.css('background-color', '#b2dfdb');
+				element.html('P '+_process);
+			}, globalDelay);
 		}
 
 		function removeProcessFromHD(local) {
-			let square = $("#hd_page_"+local);
-			let element = $("#hd_page_"+local+" span ~ span");
-			
-			square.css('background-color', '#fff');
-			element.html('P x');
+			setTimeout(function(){
+				let square = $("#hd_page_"+local);
+				let element = $("#hd_page_"+local+" span ~ span");
+				
+				square.css('background-color', '#fff');
+				element.html('P x');
+			}, globalDelay);
 		}
 
 		function setTablePages(virtualPage, pageFrame) {
-			let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
-			element.html('F '+pageFrame);
+			setTimeout(function(){
+				let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
+				element.html('F '+pageFrame);
+			}, globalDelay);
 		}
 
 		function resetTablePages(virtualPage) {
-			let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
-			element.html('F x');
+			setTimeout(function(){
+				let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
+				element.html('F x');
+			}, globalDelay);
 		}
 
 		function setTablePagesBit(virtualPage, pageFrame) {
-			let square = $("#pages_page_"+virtualPage);
-			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
-			square.css('background-color', '#b2dfdb');
-			_element.html('Bit 1');
+			setTimeout(function(){
+				let square = $("#pages_page_"+virtualPage);
+				let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
+				square.css('background-color', '#b2dfdb');
+				_element.html('Bit 1');
+			}, globalDelay);
 		}
 
 		function resetTablePagesBit(virtualPage) {
-			let square = $("#pages_page_"+virtualPage);
-			let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
-			square.css('background-color', '#fff');
-			_element.html('Bit 0');
+			setTimeout(function(){
+				let square = $("#pages_page_"+virtualPage);
+				let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
+				square.css('background-color', '#fff');
+				_element.html('Bit 0');
+			}, globalDelay);
 		}
 
 		function main() {
@@ -642,11 +658,6 @@
        				break;
 			}
 
-		/*	setProcessInRAM(2, 0);
-			setProcessInHD(2, 0);
-			setTablePages(2, 2);
-			setTablePagesBit(2, 2);
-		*/
 			setTimeout(function() { 
 				ganttGraph.stop('fx', true, false);
 				progressBar.fadeOut('fast');
