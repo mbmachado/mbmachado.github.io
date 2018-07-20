@@ -16,8 +16,14 @@ var data;
 var ioWait=[];
 var sortData;
 var currentProcess;
+var posHd=[];
+var posRam=[];
+var waitListForIO=[];
+var pageMemoryTime=[];
+var ioDelay=5;
 var extremeDeadline = 1000000;
 var freeMemory, freeHd;
+var nextFreePositionH, nextFreePositionR;
 var mainForm = $("#main_form");
 var processNumberInput = $("#process_number");
 var quamtumNumberInput = $("#quamtum_number");
@@ -180,6 +186,29 @@ function resetTablePagesBit(virtualPage) {
 	}, globalDelay + 600);
 }
 
+function beginHdAndRamAndIoLists(){
+	var procIn = -1;
+	var timeIni = -1;
+	var allPages=10;
+	for(let i=0; i<10; i++){
+		posHd[i] = {
+			"_proc" : parseInt(procIn)
+		}
+	}
+	for(let i=0; i<5; i++){
+		posRam[i] = {
+			"_proc" : parseInt(procIn),
+			"_qtdPaginas" : parseInt(allPages)
+		}
+	}
+	for(let i=0; i<5; i++){
+		pageMemoryTime[i] = {
+			"_time" : parseInt(timeIni),
+			"_proc" : parseInt(procIn)
+		}
+	}
+}
+
 function sortByArrivalTime() {
 	sortData = [];
 	var start;
@@ -312,6 +341,7 @@ mainForm.on('submit', function(event) {
 			$("#outer_info_square_"+i+"_3 span").html(i);
 		}
 		sortByArrivalTime();
+		beginHdAndRamAndIoLists();
 		main();
 	} else {
 		modalContent.html(errorMsg);
