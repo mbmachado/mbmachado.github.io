@@ -219,7 +219,7 @@
 
 		function pageChangesFIFO(actualTime){
 			var maxPagChange=3;
-			var procOut=-1, proIn=-1;
+			var procOut=-1, procIn=-1;
 			var pos=-1;
 			var choiceCol=-1, minCol=extremeDeadline;
 			var flagEnd=0;
@@ -236,7 +236,7 @@
 				}
 				if(procOut != -1){
 					sortData[procOut]._makingIO=1;
-					var ini = sortData[porcOut]._memoria*10+1;
+					var ini = sortData[procOut]._memoria*10+1;
 					for(let i=0; i<maxPagChange; i++){
 						if(posRam[pos]._qtdPaginas > 0){
 							removeProcessFromRAM(ini+(10-posRam[pos]._qtdPaginas));
@@ -282,7 +282,7 @@
 						marcado=1;
 					}else if(sortData[j]._memoria==-1){
 						sortData[j]._makingIO=1;
-						processWaitChange(i);
+						processWaitChange(j);
 					}else{
 						minDeadline = sortData[j]._deadline;
 						currentProcess = j;
@@ -290,7 +290,7 @@
 					}
 				}	
 			}
-			if(sortData[j]._memoria==-1 && freeMemory>0){
+			if(currentProcess>0 && sortData[currentProcess]._memoria==-1 && freeMemory>0){
 				putMemoryWIthFreeSpace(currentProcess, actualTime);
 			}
 		}
