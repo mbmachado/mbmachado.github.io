@@ -218,16 +218,16 @@
 		"use strict";
 
 		function pageChangesFIFO(actualTime){
-			var maxPagChange=3;
+			var maxPagChange=3; //max de paginas que pode se alterar em 1 unidade de tempo
 			var procOut=-1, procIn=-1;
 			var pos=-1;
 			var choiceCol=-1, minCol=extremeDeadline;
 			var flagEnd=0;
-			if(waitListForIO>0){
-				procIn=waitListForIO[0];
+			if(waitListForIO>0){ //se existir algum processo esperando para fazer IO
+				procIn=waitListForIO[0]; //pega o primeiro processo da lista
 				for(let i=0; i<5; i++){
-					if(pageMemoryTime[i]._proc != -1 && pageMemoryTime[i]._time < minCol){
-						if(sortData[pageMemoryTime[i]._proc]._exe == 0){
+					if(pageMemoryTime[i]._proc != -1 && pageMemoryTime[i]._time < minCol){ //procura a pagina mais antiga na memoria
+						if(sortData[pageMemoryTime[i]._proc]._exe == 0){ //se o processo na memoria nao estiver executando
 							minCol=pageMemoryTime[i]._time;
 							procOut=pageMemoryTime[i]._proc;
 							pos=i;
@@ -238,7 +238,7 @@
 					sortData[procOut]._makingIO=1;
 					var ini = sortData[procOut]._memoria*10+1;
 					for(let i=0; i<maxPagChange; i++){
-						if(posRam[pos]._qtdPaginas > 0){
+						if(posRam[pos]._qtdPaginas > 0){ //trocando as paginas do elemento que vai sair pelo que vai entrar na memoria
 							removeProcessFromRAM(ini+(10-posRam[pos]._qtdPaginas));
 							setProcessInRAM(procIn,ini+(10-posRam[pos]._qtdPaginas));
 							posRam[pos]._qtdPaginas--;
@@ -262,10 +262,10 @@
 		}
 
 		function processWaitChange(processIn){
-			waitListForIO.push(processIn);
+			waitListForIO.push(processIn); //inserindo um processo na lista para fazer IO
 		}
 
-		function pushElementNowInRAM(proc, pos, actualTime){
+		function pushElementNowInRAM(proc, pos, actualTime){ //marcando o tempo que uma pagina entrou na memoria principal
 			pageMemoryTime[pos]._time = actualTime;
 			pageMemoryTime[pos]._proc = proc;
 		}
@@ -276,8 +276,8 @@
 			for(let j=0; j<sortData.length; j++){
 				if(sortData[j]._start <= actualTime && sortData[j]._timeLeft > 0 && sortData[j]._deadline < minDeadline && sortData[j]._makingIO==0){
 
-					if(sortData[j]._memoria==-1 && freeMemory>0){
-						minDeadline = sortData[j]._deadline;
+					if(sortData[j]._memoria==-1 && freeMemory>0){ //a ram ainda tem espaco e o processo nao esta na memoria
+						minDeadline = sortData[j]._deadline;	
 						currentProcess = j;
 						marcado=1;
 					}else if(sortData[j]._memoria==-1){
@@ -291,33 +291,33 @@
 				}	
 			}
 			if(currentProcess>0 && sortData[currentProcess]._memoria==-1 && freeMemory>0){
-				putMemoryWIthFreeSpace(currentProcess, actualTime);
+				putMemoryWIthFreeSpace(currentProcess, actualTime); //inserindo direto na ram para executar
 			}
 		}
-
-		function remJustHD(proc){
+ 
+		function remJustHD(proc){ //remove todas as paginas do hd que estavam alocadas para proc
 			var ini=sortData[proc]._hd*10+1;
 			posHd[sortData[proc]._hd]._proc=-1;
 			sortData[proc]._hd=-1;
-			freeHd++;
+			freeHd++;	//aumentando a quantidade de colunas livres no hd
 			for(let i=0; i<10; i++){
 				removeProcessFromHD(ini+i);
 			} 
 			
 		}	
 
-		function remJustRAM(proc){
+		function remJustRAM(proc){	//remove todas as paginas da ram que estavam alocadas para proc
 			var ini=sortData[proc]._memoria*10+1;
 			posRam[sortData[proc]._memoria]._proc=-1;
 			posRam[sortData[proc]._memoria]._qtdPaginas=10;
 			sortData[proc]._memoria=-1;
-			freeMemory++;
+			freeMemory++;	//aumentando a quantidade de colunas livres na ram
 			for(let i=0; i<10; i++){
 				removeProcessFromRAM(ini+i);
 			}
 		}		
 
-		function putJustInRAM(proc, actualTime){
+		function putJustInRAM(proc, actualTime){ //preenchendo uma coluna da ram para proc
 			takeNextFreeSpaceInMemory();
 			var ini=nextFreePositionR*10+1;
 			sortData[proc]._memoria=nextFreePositionR;
@@ -329,7 +329,7 @@
 			pushElementNowInRAM(proc,  nextFreePositionR, actualTime);
 		}
 
-		function putJustInHD(proc){
+		function putJustInHD(proc){ //preenchendo uma coluna do hd para proc
 			takeNextFreeSpaceInMemory();
 			var ini=nextFreePositionH*10+1;
 			sortData[proc]._hd=nextFreePositionH;
@@ -340,7 +340,7 @@
 			}
 		}
 
-		function takeNextFreeSpaceInMemory(){
+		function takeNextFreeSpaceInMemory(){ //procurar qual sera a coluna livre que sera inserida do processo, tanto na ram quanto no hd
 			nextFreePositionH=-1;
 			nextFreePositionR=-1;
 			var flagM=0;
@@ -360,7 +360,7 @@
 			
 		}
 		
-		function putMemoryWIthFreeSpace(proc, actualTime){
+		function putMemoryWIthFreeSpace(proc, actualTime){ //inserindo um processo direto na ram e no hd que estao com espaco livre
 			takeNextFreeSpaceInMemory();
 			if(sortData[proc]._hd==-1){
 				sortData[proc]._hd=nextFreePositionH;
@@ -381,7 +381,7 @@
 			pushElementNowInRAM(proc,  nextFreePositionR, actualTime);
 		}
 
-		function choiceProcessFIFO(actualTime){
+		function choiceProcessFIFO(actualTime){ 
 			var marcado=0;
 			currentProcess=-1;
 			for(let i=0; i<sortData.length; i++){
@@ -392,7 +392,7 @@
 						currentProcess=i;
 					}else if(sortData[i]._memoria==-1){
 						sortData[i]._makingIO=1;
-						processWaitChange(i);
+						processWaitChange(i); //nao esta na ram e a ram esta cheia, colocando na lista de espera para IO
 					}else{
 						marcado=1;
 						currentProcess=i;
@@ -422,7 +422,7 @@
 			}	
 		}
 
-		function putOtherProcess(actualTime){
+		function putOtherProcess(actualTime){ //verifica enquanto um processo esta executando na cpu, se outros chegaram para a fila de prontos 
 			for(let i=0; i<sortData.length; i++){
 				if(sortData[i]._start <= actualTime && sortData[i]._hd==-1 && sortData[i]._timeLeft > 0){
 					putJustInHD(i);
@@ -437,33 +437,33 @@
 			var lastPosition = 0;
 			var i = 0;
 			var tam = sortData.length;
-			while(i < tam){
+			while(i < tam){ //enquanto todos os processos não tiverem sido executados
 				currentProcess = -1;
 				choiceProcessFIFO(lastPosition);
-				while(currentProcess == -1){
+				while(currentProcess == -1){ //enquanto nao tiver nenhum processo na fila de prontos
 					lastPosition++;
 					//paginas
-					if(data["pageReplacement"] == "FIFO"){
+					if(data["pageReplacement"] == "FIFO"){	//verificar se tem alguem fazendo IO
 						pageChangesFIFO(lastPosition);
 					}
-					choiceProcessFIFO(lastPosition);
+					choiceProcessFIFO(lastPosition); //procura por um processo na fila de prontos
 				}
-				sortData[currentProcess]._exe=1;
+				sortData[currentProcess]._exe=1; //marca que o currentProcess esta na cpu
 				for(let j=0; j<sortData[currentProcess]._time; j++) {
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
 					lastPosition++;
-					if(data["pageReplacement"] == "FIFO"){
+					if(data["pageReplacement"] == "FIFO"){	//verificar se tem alguem fazendo IO
 						pageChangesFIFO(lastPosition);
 					}
-					putOtherProcess(lastPosition);
+					putOtherProcess(lastPosition); //verificar se algum processo chegou a fila de prontos enquanto um esta executando na cpu
 					//paginas
 				}
-				sortData[currentProcess]._exe=0;
-				sortData[currentProcess]._endTime=lastPosition;
-				sortData[currentProcess]._timeLeft=0;
-				remJustRAM(currentProcess);
-				remJustHD(currentProcess);
-				i++;
+				sortData[currentProcess]._exe=0; //tira o currentProcess da cpu
+				sortData[currentProcess]._endTime=lastPosition;	//marca o tempo de termino
+				sortData[currentProcess]._timeLeft=0; //marca que nao existe mais tempo restante para executar
+				remJustRAM(currentProcess); //tira o processo que terminou da ram
+				remJustHD(currentProcess);	//tira o processo que terminou do hd
+				i++; //mais um processo terminou de executar
 			}
 		}
 
