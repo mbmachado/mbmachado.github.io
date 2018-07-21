@@ -40,7 +40,7 @@
 								</div>
 								<div class="row">
 									<div class="col s12 center-align">
-										<a id="replay_btn" class="waves-effect waves-light btn cyan lighten-2 pulse">De novo</a>
+										<a id="replay_btn" class="waves-effect waves-light btn indigo darken-2 pulse">De novo</a>
 									</div>
 								</div>
 							</div>
@@ -240,7 +240,7 @@
 					for(let i=0; i<maxPagChange; i++){
 						if(posRam[pos]._qtdPaginas > 0){ //trocando as paginas do elemento que vai sair pelo que vai entrar na memoria
 							removeProcessFromRAM(ini+(10-posRam[pos]._qtdPaginas));
-							setProcessInRAM(procIn,ini+(10-posRam[pos]._qtdPaginas));
+							setProcessInRAM(procIn, ini+(10-posRam[pos]._qtdPaginas));
 							posRam[pos]._qtdPaginas--;
 						}else{
 							flagEnd=1;
@@ -357,7 +357,6 @@
 					flagM=1;
 				} 
 			}
-			
 		}
 		
 		function putMemoryWIthFreeSpace(proc, actualTime){ //inserindo um processo direto na ram e no hd que estao com espaco livre
