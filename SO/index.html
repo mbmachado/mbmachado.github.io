@@ -313,20 +313,23 @@
 			}
 		}		
 
-		function putJustInRAM(proc){
+		function putJustInRAM(proc, actualTime){
 			takeNextFreeSpaceInMemory();
 			var ini=nextFreePositionR*10+1;
 			sortData[proc]._memoria=nextFreePositionR;
+			posRam[nextFreePositionR]._proc = sortData[proc]._processNumber;
 			freeMemory--;
 			for(let i=0; i<10; i++){
 				setProcessInRAM(ini+i, sortData[proc]._processNumber);
 			}
+			pushElementNowInRAM(proc,  nextFreePositionR, actualTime);
 		}
 
 		function putJustInHD(proc){
 			takeNextFreeSpaceInMemory();
 			var ini=nextFreePositionH*10+1;
 			sortData[proc]._hd=nextFreePositionH;
+			posHd[nextFreePositionH]._proc = sortData[proc]._processNumber;
 			freeHd--;
 			for(let i=0; i<10; i++){
 				setProcessInHD(ini+i, sortData[proc]._processNumber);
@@ -359,18 +362,19 @@
 				sortData[proc]._hd=nextFreePositionH;
 				var ini = nextFreePositionH*10+1;
 				freeHd--;
+				posHd[nextFreePositionH]._proc = sortData[proc]._processNumber;
 				for(let i=0; i<10; i++){
 					setProcessInHD(ini+i, sortData[proc]._processNumber);
 				}
 			}
 			ini=nextFreePositionR*10+1;
 			sortData[proc]._memoria=nextFreePositionR;
+			posRam[nextFreePositionR]._proc = sortData[proc]._processNumber;
 			freeMemory--;
 			for(let i=0; i<10; i++){
 				setProcessInRAM(ini+i, sortData[proc]._processNumber);
 			}
 			pushElementNowInRAM(proc,  nextFreePositionR, actualTime);
-		
 		}
 
 		function choiceProcessFIFO(actualTime){
@@ -416,10 +420,10 @@
 
 		function putOtherProcess(actualTime){
 			for(let i=0; i<sortData.length; i++){
-				if(sortData[i]._start <= actualTime && sortData[i]._hd==-1){
+				if(sortData[i]._start <= actualTime && sortData[i]._hd==-1 && sortData[i]._timeLeft > 0){
 					putJustInHD(i);
 					if(freeMemory > 0){
-						putJustInRAM(i);
+						putJustInRAM(i, actualTime);
 					}
 				}
 			}
@@ -486,8 +490,8 @@
 				}
 				sortData[currentProcess]._endTime=lastPosition;
 				sortData[currentProcess]._timeLeft=0;
-				//remJustRAM(currentProcess);
-				//remJustHD(currentProcess);
+				remJustRAM(currentProcess);
+				remJustHD(currentProcess);
 				i++;
 			}            
 		}
@@ -603,19 +607,20 @@
 					}
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[colorConsideringDeadline]);
 					lastPosition++;
+					//paginas
 					putOtherProcess(lastPosition);
 				}
 				if(endOneProcess == 1){
 					finhishedProcess++;
 					sortData[currentProcess]._endTime = lastPosition;
-					//remJustHD(currentProcess);
-					//remJustRAM(currentProcess);
+					remJustHD(currentProcess);
+					remJustRAM(currentProcess);
 				}else { 
 					for(let j = 0; j < data["overload"]; j++) {
 						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
 						lastPosition++;
-						putOtherProcess(lastPosition);
 						//paginas
+						putOtherProcess(lastPosition);
 					}
 				}
 			}
