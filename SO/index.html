@@ -227,32 +227,36 @@
 				procIn=waitListForIO[0];
 				for(let i=0; i<5; i++){
 					if(pageMemoryTime[i]._proc != -1 && pageMemoryTime[i]._time < minCol){
-						minCol=pageMemoryTime[i]._time;
-						procOut=pageMemoryTime[i]._proc;
-						pos=i;
+						if(sortData[pageMemoryTime[i]._proc]._exe == 0){
+							minCol=pageMemoryTime[i]._time;
+							procOut=pageMemoryTime[i]._proc;
+							pos=i;
+						}
 					}
 				}
-				sortData[procOut]._makingIO=1;
-				var ini = sortData[porcOut]._memoria*10+1;
-				for(let i=0; i<maxPagChange; i++){
-					if(posRam[pos]._qtdPaginas > 0){
-						removeProcessFromRAM(ini+(10-posRam[pos]._qtdPaginas));
-						setProcessInRAM(procIn,ini+(10-posRam[pos]._qtdPaginas));
-						posRam[pos]._qtdPaginas--;
-					}else{
-						flagEnd=1;
+				if(procOut != -1){
+					sortData[procOut]._makingIO=1;
+					var ini = sortData[porcOut]._memoria*10+1;
+					for(let i=0; i<maxPagChange; i++){
+						if(posRam[pos]._qtdPaginas > 0){
+							removeProcessFromRAM(ini+(10-posRam[pos]._qtdPaginas));
+							setProcessInRAM(procIn,ini+(10-posRam[pos]._qtdPaginas));
+							posRam[pos]._qtdPaginas--;
+						}else{
+							flagEnd=1;
+						}
 					}
-				}
-				if(flagEnd == 1){
-					sortData[procOut]._memoria=-1;
-					sortData[procOut]._makingIO=0;
-					sortData[procIn]._memoria=pos;
-					sortData[procIn]._makingIO=0;
-					posRam[pos]._qtdPaginas=10;
-					posRam[pos]._proc=procIn;
-					pageMemoryTime[pos]._proc=procIn;
-					pageMemoryTime[pos]._time=actualTime;
-					waitListForIO.shift();
+					if(flagEnd == 1){
+						sortData[procOut]._memoria=-1;
+						sortData[procOut]._makingIO=0;
+						sortData[procIn]._memoria=pos;
+						sortData[procIn]._makingIO=0;
+						posRam[pos]._qtdPaginas=10;
+						posRam[pos]._proc=procIn;
+						pageMemoryTime[pos]._proc=procIn;
+						pageMemoryTime[pos]._time=actualTime;
+						waitListForIO.shift();
+					}
 				}
 			}
 		}
@@ -429,7 +433,7 @@
 			}
 		}
 
-		function fifo2() {
+		function fifo() {
 			var lastPosition = 0;
 			var i = 0;
 			var tam = sortData.length;
@@ -439,14 +443,22 @@
 				while(currentProcess == -1){
 					lastPosition++;
 					//paginas
+					if(data["pageReplacement"] == "FIFO"){
+						pageChangesFIFO(lastPosition);
+					}
 					choiceProcessFIFO(lastPosition);
 				}
-				for(let j=0; j<sortData[i]._time; j++) {
+				sortData[currentProcess]._exe=1;
+				for(let j=0; j<sortData[currentProcess]._time; j++) {
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
 					lastPosition++;
+					if(data["pageReplacement"] == "FIFO"){
+						pageChangesFIFO(lastPosition);
+					}
 					putOtherProcess(lastPosition);
 					//paginas
 				}
+				sortData[currentProcess]._exe=0;
 				sortData[currentProcess]._endTime=lastPosition;
 				sortData[currentProcess]._timeLeft=0;
 				remJustRAM(currentProcess);
@@ -455,19 +467,6 @@
 			}
 		}
 
-		function fifo() {
-			var lastPosition = 0;
-			for(let i= 0; i < sortData.length; i++) {
-				if(lastPosition < sortData[i]._start) {
-					lastPosition = sortData[i]._start;
-				}
-				for(let j=0; j<sortData[i]._time; j++) {
-					makeProgressInGanttSquare(sortData[i]._processNumber, lastPosition);
-					lastPosition++;
-				}
-				sortData[i]._endTime = lastPosition;
-			}
-		}
         
         function sjf() {
 			var lastPosition = 0;
@@ -480,14 +479,22 @@
 				while(currentProcess == -1){
 					lastPosition++;
 					//paginas
+					if(data["pageReplacement"] == "FIFO"){
+						pageChangesFIFO(lastPosition);
+					}
 					choiceProcessSJF(lastPosition);
 				}
-				for(let j=0; j<sortData[i]._time; j++) {
+				sortData[currentProcess]._exe=1;
+				for(let j=0; j<sortData[currentProcess]._time; j++) {
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
 					lastPosition++;
+					if(data["pageReplacement"] == "FIFO"){
+						pageChangesFIFO(lastPosition);
+					}
 					putOtherProcess(lastPosition);
 					//paginas
 				}
+				sortData[currentProcess]._exe=0;
 				sortData[currentProcess]._endTime=lastPosition;
 				sortData[currentProcess]._timeLeft=0;
 				remJustRAM(currentProcess);
@@ -601,6 +608,7 @@
 
 				sortData[currentProcess]._timeLeft = sortData[currentProcess]._timeLeft - timeForExecution;
 				var colorConsideringDeadline = 0;
+				sortData[currentProcess]._exe = 1;
 				for(let j = 0; j < timeForExecution; j++){
 					if(sortData[currentProcess]._deadline <= lastPosition){
 						colorConsideringDeadline=2;
@@ -608,8 +616,12 @@
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[colorConsideringDeadline]);
 					lastPosition++;
 					//paginas
+					if(data["pageReplacement"] == "FIFO"){
+						pageChangesFIFO(lastPosition);
+					}
 					putOtherProcess(lastPosition);
 				}
+				sortData[currentProcess]._exe=0;
 				if(endOneProcess == 1){
 					finhishedProcess++;
 					sortData[currentProcess]._endTime = lastPosition;
@@ -620,6 +632,9 @@
 						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
 						lastPosition++;
 						//paginas
+						if(data["pageReplacement"] == "FIFO"){
+							pageChangesFIFO(lastPosition);
+						}
 						putOtherProcess(lastPosition);
 					}
 				}
@@ -631,7 +646,7 @@
 			freeHd=10;
 			switch (data["algorithm"]) {
 			    case "FIFO":
-			        fifo2(); 
+			        fifo(); 
 			        break;
 			    case "SJF":
 			        sjf();
