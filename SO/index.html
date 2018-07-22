@@ -277,7 +277,7 @@
 			}
 		}
 
-		function pageChangesFIFO(actualTime){
+		function pageChanges(actualTime){
 			var maxPagChange=3; //max de paginas que pode se alterar em 1 unidade de tempo
 			var procOut=-1, procIn=-1;
 			var pos=-1;
@@ -300,7 +300,7 @@
 					for(let i=0; i<maxPagChange; i++){
 						if(posRam[pos]._qtdPaginas > 0){ //trocando as paginas do elemento que vai sair pelo que vai entrar na memoria
 							removeProcessFromRAM(ini+(10-posRam[pos]._qtdPaginas));
-							setProcessInRAM(procIn, ini+(10-posRam[pos]._qtdPaginas));
+							setProcessInRAM(sortData[procIn]._processNumber, ini+(10-posRam[pos]._qtdPaginas));
 							posRam[pos]._qtdPaginas--;
 						}else{
 							flagEnd=1;
@@ -317,8 +317,8 @@
 						pageMemoryTime[pos]._time=actualTime;
 						waitListForIO.shift();
 					}
-					alterPagesTable(procOut);
-					putInPagesTable(ini, procIn);
+					alterPagesTable(sortData[procOut]._processNumber);
+					putInPagesTable(ini, sortData[procIn]._processNumber);
 				}
 			}
 		}
@@ -503,18 +503,17 @@
 				while(currentProcess == -1){ //enquanto nao tiver nenhum processo na fila de prontos
 					lastPosition++;
 					//paginas
-					if(data["pageReplacement"] == "FIFO") {	//verificar se tem alguem fazendo IO
-						pageChangesFIFO(lastPosition);
-					}
+					pageChanges(lastPosition);			
 					choiceProcessFIFO(lastPosition); //procura por um processo na fila de prontos
 				}
 				sortData[currentProcess]._exe=1; //marca que o currentProcess esta na cpu
 				for(let j=0; j<sortData[currentProcess]._time; j++) {
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
 					lastPosition++;
-					if(data["pageReplacement"] == "FIFO"){	//verificar se tem alguem fazendo IO
-						pageChangesFIFO(lastPosition);
+					if(data["algorithm"]=="LRU"){
+						pushElementNowInRAM(sortData[currentProcess]._processNumber,  sortData[currentProcess]._memoria, lastPosition);
 					}
+					pageChanges(lastPosition);
 					putOtherProcess(lastPosition); //verificar se algum processo chegou a fila de prontos enquanto um esta executando na cpu
 					//paginas
 				}
@@ -523,7 +522,7 @@
 				sortData[currentProcess]._timeLeft=0; //marca que nao existe mais tempo restante para executar
 				remJustRAM(currentProcess); //tira o processo que terminou da ram
 				remJustHD(currentProcess);	//tira o processo que terminou do hd
-				remJustPagesTable(currentProcess); //tira o processo que terminou da tabela de páginas
+				remJustPagesTable(sortData[currentProcess]._processNumber); //tira o processo que terminou da tabela de páginas
 				i++; //mais um processo terminou de executar
 			}
 		}
@@ -540,18 +539,17 @@
 				while(currentProcess == -1){
 					lastPosition++;
 					//paginas
-					if(data["pageReplacement"] == "FIFO"){
-						pageChangesFIFO(lastPosition);
-					}
+					pageChanges(lastPosition);
 					choiceProcessSJF(lastPosition);
 				}
 				sortData[currentProcess]._exe=1;
 				for(let j=0; j<sortData[currentProcess]._time; j++) {
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
 					lastPosition++;
-					if(data["pageReplacement"] == "FIFO"){
-						pageChangesFIFO(lastPosition);
+					if(data["algorithm"]=="LRU"){
+						pushElementNowInRAM(sortData[currentProcess]._processNumber,  sortData[currentProcess]._memoria, lastPosition);
 					}
+					pageChanges(lastPosition);
 					putOtherProcess(lastPosition);
 					//paginas
 				}
@@ -560,7 +558,7 @@
 				sortData[currentProcess]._timeLeft=0;
 				remJustRAM(currentProcess);
 				remJustHD(currentProcess);
-				remJustPagesTable(currentProcess); //tira o processo que terminou da tabela de páginas
+				remJustPagesTable(sortData[currentProcess]._processNumber); //tira o processo que terminou da tabela de páginas
 				i++;
 			}            
 		}
@@ -658,6 +656,7 @@
 				while(currentProcess == -1){
 					lastPosition++;
 					//paginas
+					pageChanges(lastPosition);
 					choiceProcessEDF(lastPosition);
 				}
 				
@@ -678,9 +677,10 @@
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, colors[colorConsideringDeadline]);
 					lastPosition++;
 					//paginas
-					if(data["pageReplacement"] == "FIFO"){
-						pageChangesFIFO(lastPosition);
+					if(data["algorithm"]=="LRU"){
+						pushElementNowInRAM(sortData[currentProcess]._processNumber,  sortData[currentProcess]._memoria, lastPosition);
 					}
+					pageChanges(lastPosition);
 					putOtherProcess(lastPosition);
 				}
 				sortData[currentProcess]._exe=0;
@@ -689,15 +689,13 @@
 					sortData[currentProcess]._endTime = lastPosition;
 					remJustHD(currentProcess);
 					remJustRAM(currentProcess);
-					remJustPagesTable(currentProcess);
+					remJustPagesTable(sortData[currentProcess]._processNumber);
 				}else { 
 					for(let j = 0; j < data["overload"]; j++) {
 						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
 						lastPosition++;
 						//paginas
-						if(data["pageReplacement"] == "FIFO"){
-							pageChangesFIFO(lastPosition);
-						}
+						pageChanges(lastPosition);
 						putOtherProcess(lastPosition);
 					}
 				}
