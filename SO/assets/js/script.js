@@ -18,6 +18,7 @@ var sortData;
 var currentProcess;
 var posHd=[];
 var posRam=[];
+var posPagesTable=[];
 var waitListForIO=[];
 var pageMemoryTime=[];
 var ioDelay=5;
@@ -168,7 +169,7 @@ function resetTablePages(virtualPage) {
 	}, globalDelay + 600);
 }
 
-function setTablePagesBit(virtualPage, pageFrame) {
+function setTablePagesBit(virtualPage) {
 	setTimeout(function(){
 		let square = $("#pages_page_"+virtualPage);
 		let _element = $("#pages_page_"+virtualPage+" span:nth-child(3)");
@@ -186,7 +187,7 @@ function resetTablePagesBit(virtualPage) {
 	}, globalDelay + 600);
 }
 
-function beginHdAndRamAndIoLists(){
+function beginHdAndRamAndPagesTableAndIoLists() {
 	var procIn = -1;
 	var timeIni = -1;
 	var allPages=10;
@@ -204,6 +205,11 @@ function beginHdAndRamAndIoLists(){
 	for(let i=0; i<5; i++){
 		pageMemoryTime[i] = {
 			"_time" : parseInt(timeIni),
+			"_proc" : parseInt(procIn)
+		}
+	}
+	for(let i=0; i<10; i++){
+		posPagesTable[i] = {
 			"_proc" : parseInt(procIn)
 		}
 	}
@@ -342,7 +348,7 @@ mainForm.on('submit', function(event) {
 			$("#outer_info_square_"+i+"_3 span").html(i);
 		}
 		sortByArrivalTime();
-		beginHdAndRamAndIoLists();
+		beginHdAndRamAndPagesTableAndIoLists();
 		main();
 	} else {
 		modalContent.html(errorMsg);
