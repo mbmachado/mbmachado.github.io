@@ -217,28 +217,39 @@
 	<script>
 		"use strict";
 
-		function putInPagesTable(initialPageFrame, proc) {
-			let ini, notInPagesTable = true;
+		function putInPagesTable(_initialPageFrame, _proc) {
+			let notInPagesTable = true, proc = sortData[_proc]._processNumber, itIsInRam = false, ini, initialPageFrame;
+			if(sortData[_proc]._memoria != -1) {
+				initialPageFrame = sortData[_proc]._memoria*10+1;
+				itIsInRam = true;
+			}
 			for (let j = 0; j < 10; j++) {
 				if(posPagesTable[j]._proc == proc) {
 					notInPagesTable = false;
 					ini=j*10+1;
 					for (let i = 0; i < 10 ; i++) {
-						setTablePages(ini+i, initialPageFrame + i);
-						setTablePagesBit(ini+i);
+						if (itIsInRam) {
+							setTablePagesFrame(ini+i, initialPageFrame + i);
+							setTablePagesBit(ini+i);
+						} else {
+							setTablePages(ini+i);
+						}
 					}
 					break;
 				} 
 			}
-
 			if(notInPagesTable) {
 				for (let j = 0; j < 10; j++) {
 					if(posPagesTable[j]._proc == -1) {
 						posPagesTable[j]._proc = proc;
 						ini=j*10+1;
 						for (let i = 0; i < 10 ; i++) {
-							setTablePages(ini+i, initialPageFrame + i);
-							setTablePagesBit(ini+i);
+							if (itIsInRam) {
+								setTablePagesFrame(ini+i, initialPageFrame + i);
+								setTablePagesBit(ini+i);
+							} else {
+								setTablePages(ini+i);
+							}
 						}
 						break;
 					} 
@@ -253,6 +264,7 @@
 					ini=j*10+1;
 					for (let i = 0; i < 10 ; i++) {
 						resetTablePagesBit(ini+i);
+						setTablePages(ini+i);
 					}
 					break;
 				} 
@@ -315,8 +327,8 @@
 						pageMemoryTime[pos]._time=actualTime;
 						waitListForIO.shift();
 					}
-					alterPagesTable(sortData[procOut]._processNumber);
-					putInPagesTable(ini, sortData[procIn]._processNumber);
+					alterPagesTable(procOut);
+					putInPagesTable(ini, procIn);
 				}
 			}
 		}
@@ -385,7 +397,7 @@
 			for(let i=0; i<10; i++){
 				setProcessInRAM(ini+i, sortData[proc]._processNumber);
 			}
-			putInPagesTable(ini, sortData[proc]._processNumber);
+			putInPagesTable(ini, proc);
 			pushElementNowInRAM(proc,  nextFreePositionR, actualTime);
 		}
 
@@ -398,9 +410,10 @@
 			for(let i=0; i<10; i++){
 				setProcessInHD(ini+i, sortData[proc]._processNumber);
 			}
+			putInPagesTable(ini, proc);
 		}
 
-		function takeNextFreeSpaceInMemory(){ //procurar qual sera a coluna livre que sera inserida do processo, tanto na ram quanto no hd
+		function takeNextFreeSpaceInMemory() { //procurar qual sera a coluna livre que sera inserida do processo, tanto na ram quanto no hd
 			nextFreePositionH=-1;
 			nextFreePositionR=-1;			
 			for(let i=0; i<posHd.length; i++){
@@ -436,7 +449,7 @@
 			for(let i=0; i<10; i++){
 				setProcessInRAM(ini+i, sortData[proc]._processNumber);
 			}
-			putInPagesTable(ini, sortData[proc]._processNumber);
+			putInPagesTable(ini, proc);
 			pushElementNowInRAM(proc,  nextFreePositionR, actualTime);
 		}
 
@@ -739,7 +752,7 @@
 				innerOverlayPanel.show('fast');
 			}, globalDelay + 600);
 		}
-
+		
 	</script>
 </body>
 </html>

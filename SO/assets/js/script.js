@@ -155,7 +155,14 @@ function removeProcessFromHD(local) {
 	}, globalDelay + 600);
 }
 
-function setTablePages(virtualPage, pageFrame) {
+function setTablePages(virtualPage) {
+	setTimeout(function(){
+		let square = $("#pages_page_"+virtualPage);
+		square.css('background-color', '#cfd8dc');
+	}, globalDelay + 600);
+}
+
+function setTablePagesFrame(virtualPage, pageFrame) {
 	setTimeout(function(){
 		let element = $("#pages_page_"+virtualPage+" span:nth-child(2)");
 		element.html('F '+pageFrame);
