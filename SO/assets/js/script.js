@@ -238,6 +238,7 @@ function sortByArrivalTime() {
 			"_endTime"       : parseInt(endTime),
 			"_memoria"		 : parseInt(hd1),
 			"_hd"			 : parseInt(hd1),
+			"_rr"			 : parseInt(io),
 			"_exe"			 : parseInt(io)
 		};
 	}
