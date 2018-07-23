@@ -208,9 +208,6 @@
 	      <a href="#!" class="modal-close waves-effect waves-teal btn-flat">Ok</a>
 	    </div>
   	</div>
-  	<div style="position: fixed; top: 10px; left: 10px;">
-  		<a class="btn indigo darken-2 waves-effect"  onclick="fastStart(event)" href="#">teste rápido</a>
-  	</div>
 	<script src="assets/vendor/jQuery/jquery-3.3.1.min.js"></script>
 	<script src="assets/vendor/jQuery-ui-1.12.1/jquery-ui.min.js"></script>
 	<script src="assets/vendor/jQuery-Mask-Plugin/dist/jquery.mask.min.js"></script>
@@ -741,28 +738,6 @@
 				meanTurnaroundSpan.html(meanTurnAround()+" s");
 				innerOverlayPanel.show('fast');
 			}, globalDelay + 600);
-		}
-
-		var fastStart = function(event) {
-			event.preventDefault();
-			data = [];
-			data["algorithm"] = "FIFO"; 
-			data["processes"] = 5;
-			data["quantum"] =  2;
-			data["overload"] = 2;
-			data["pageReplacement"] = "FIFO";
-
-			for (var i = 0; i < 5; i++) {
-				data[i] = {
-					"_start"    : 0, 
-					"_time"     : 10,
-					"_deadline" : 15,
-				};
-			}
-
-			sortByArrivalTime();
-			beginHdAndRamAndPagesTableAndIoLists();
-			main();
 		}
 
 	</script>
