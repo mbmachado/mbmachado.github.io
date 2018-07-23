@@ -311,6 +311,7 @@
 						sortData[procOut]._makingIO=0;
 						sortData[procIn]._memoria=pos;
 						sortData[procIn]._makingIO=0;
+						sortData[procIn]._rr=actualTime;
 						posRam[pos]._qtdPaginas=10;
 						posRam[pos]._proc=procIn;
 						pageMemoryTime[pos]._proc=procIn;
@@ -430,6 +431,7 @@
 					setProcessInHD(ini+i, sortData[proc]._processNumber);
 				}
 			}
+			sortData[proc]._rr=actualTime;
 			ini=nextFreePositionR*10+1;
 			sortData[proc]._memoria=nextFreePositionR;
 			posRam[nextFreePositionR]._proc = sortData[proc]._processNumber;
@@ -439,6 +441,29 @@
 			}
 			putInPagesTable(ini, sortData[proc]._processNumber);
 			pushElementNowInRAM(proc,  nextFreePositionR, actualTime);
+		}
+
+		function choiceProcessRR(actualTime){
+			currentProcess=-1;
+			var actualP = -1;
+			var menorTem=10000000000; 
+			for(let i=0; i<sortData.length; i++) {
+				if(sortData[i]._start <= actualTime && sortData[i]._makingIO==0 && sortData[i]._timeLeft>0 && sortData[i]._rr < menorTem){
+					actualP=i;
+					menorTem=sortData[i]._rr;
+				}
+			}
+			if(actualP!=-1){
+				if(sortData[actualP]._memoria!=-1){
+					currentProcess=actualP;	
+				}else if(sortData[actualP]._memoria==-1 && freeMemory>0){
+					putMemoryWIthFreeSpace(actualP, actualTime);
+					currentProcess=actualP;
+				}else{
+					processWaitChange(actualP);
+				}
+				
+			}
 		}
 
 		function choiceProcessFIFO(actualTime) { 
@@ -486,6 +511,7 @@
 			for(let i=0; i<sortData.length; i++){
 				if(sortData[i]._start <= actualTime && sortData[i]._hd==-1 && sortData[i]._timeLeft > 0){
 					putJustInHD(i);
+					sortData[i]._rr=actualTime;
 					if(freeMemory > 0){
 						putJustInRAM(i, actualTime);
 					}
@@ -564,76 +590,62 @@
 		}
         
         function roundRobin() {
-            var lastPosition = 0;
-            var spinning = [];
-            var count = 0;
-            var countLastPos = 0;
-            var currentProcess;
-            var timeForExecution;
-            var nextIsOver;
-            var rrIsOver = false;
-            var spinningIsOver = false;
-            
-            while(!rrIsOver){
-                
-                if(lastPosition < sortData[count]._start) {
-					lastPosition = sortData[count]._start;
+           var lastPosition = 0;
+			var finhishedProcess = 0;
+			var allProcess = sortData.length;
+			var timeForExecution;
+			var endOneProcess = 0;
+			var proc = 0;
+			while(finhishedProcess < allProcess) {
+				currentProcess = -1;
+				endOneProcess = 0;
+				timeForExecution = 0;
+				choiceProcessRR(lastPosition);
+				while(currentProcess == -1){
+					lastPosition++;
+					//paginas
+					pageChanges(lastPosition);
+					choiceProcessRR(lastPosition);
 				}
-                for (;count < sortData.length; count++) {
-                    if (sortData[count]._start <= lastPosition) {
-                        spinning.push(count);
-                    }else{
-                        break;
-                    }
-                }
-                    
-                spinningIsOver = false;
-                while (!spinningIsOver){
-                    if (spinning.length <= 0){ break; }
-                    currentProcess = spinning.shift();
-                    if(sortData[currentProcess]._timeLeft <= data["quantum"]) {
-                        timeForExecution = sortData[currentProcess]._timeLeft;
-                        nextIsOver = true;
-                    }else{
-                        timeForExecution = data["quantum"];
-                        nextIsOver = false;
-                    }
-                    sortData[currentProcess]._timeLeft -= timeForExecution;
+				
+				if(sortData[currentProcess]._timeLeft <= data["quantum"]) {
+					timeForExecution = sortData[currentProcess]._timeLeft;
+					endOneProcess = 1;
+				} else {
+					timeForExecution = data["quantum"];
+				}
 
-                    for(let j = 0; j < timeForExecution; j++) {
-                        makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
-                        lastPosition++;
-                    }
-                    if(nextIsOver) {
-                        sortData[currentProcess]._endTime = lastPosition;
-                        for (;count < sortData.length; count++) {
-                            if (sortData[count]._start <= lastPosition) {
-                                spinning.push(count);
-                            }else{
-                                break;
-                            }
-                        }
-                        if (spinning.length <= 0){
-                            spinningIsOver = true;
-                        }
-                    }else {
-                        for(let j = 0; j < data["overload"]; j++) {
-                            makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
-                            lastPosition++;
-                        }
-                        for (; count < sortData.length; count++) {
-                            if (sortData[count]._start <= lastPosition) {
-                                spinning.push(count);
-                            }else{
-                                break;
-                            }
-                        }
-                        spinning.push(currentProcess);
-                    }
-                }
-                
-                if (count >= sortData.length) { rrIsOver = true; }
-            }
+				sortData[currentProcess]._timeLeft = sortData[currentProcess]._timeLeft - timeForExecution;
+				sortData[currentProcess]._exe = 1;
+				for(let j = 0; j < timeForExecution; j++){
+					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
+					lastPosition++;
+					//paginas
+					if(data["algorithm"]=="LRU"){
+						pushElementNowInRAM(sortData[currentProcess]._processNumber,  sortData[currentProcess]._memoria, lastPosition);
+					}
+					pageChanges(lastPosition);
+					putOtherProcess(lastPosition);
+				}
+				sortData[currentProcess]._exe=0;
+				sortData[currentProcess]._rr=lastPosition;
+				if(endOneProcess == 1){
+					finhishedProcess++;
+					sortData[currentProcess]._endTime = lastPosition;
+					remJustHD(currentProcess);
+					remJustRAM(currentProcess);
+					remJustPagesTable(sortData[currentProcess]._processNumber);
+				}else { 
+					for(let j = 0; j < data["overload"]; j++) {
+						makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
+						lastPosition++;
+						//paginas
+						pageChanges(lastPosition);
+						putOtherProcess(lastPosition);
+					}
+					sortData[currentProcess]._rr=lastPosition;
+				}
+			}
         }
 
 		function edf() {
