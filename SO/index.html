@@ -292,14 +292,24 @@
 			var pos=-1;
 			var choiceCol=-1, minCol=extremeDeadline;
 			var flagEnd=0;
-			if(waitListForIO>0){ //se existir algum processo esperando para fazer IO
+			if(waitListForIO.length>0){ //se existir algum processo esperando para fazer IO
 				procIn=waitListForIO[0]; //pega o primeiro processo da lista
 				for(let i=0; i<5; i++){
-					if(pageMemoryTime[i]._proc != -1 && pageMemoryTime[i]._time < minCol){ //procura a pagina mais antiga na memoria
-						if(sortData[pageMemoryTime[i]._proc]._exe == 0){ //se o processo na memoria nao estiver executando
-							minCol=pageMemoryTime[i]._time;
-							procOut=pageMemoryTime[i]._proc;
+					if(pageMemoryTime[i]._proc != -1){
+						if(sortData[pageMemoryTime[i]._proc]._makingIO==1){
+							procOut==pageMemoryTime[i]._proc;
 							pos=i;
+						}
+					}
+				}
+				if(procOut==-1){
+					for(let i=0; i<5; i++){
+						if(pageMemoryTime[i]._proc != -1 && pageMemoryTime[i]._time < minCol){ //procura a pagina mais antiga na memoria
+							if(sortData[pageMemoryTime[i]._proc]._exe == 0){ //se o processo na memoria nao estiver executando
+								minCol=pageMemoryTime[i]._time;
+								procOut=pageMemoryTime[i]._proc;
+								pos=i;
+							}
 						}
 					}
 				}
@@ -307,9 +317,9 @@
 					sortData[procOut]._makingIO=1;
 					var ini = sortData[procOut]._memoria*10+1;
 					for(let i=0; i<maxPagChange; i++){
-						if(posRam[pos]._qtdPaginas > 0){ //trocando as paginas do elemento que vai sair pelo que vai entrar na memoria
+						if(posRam[pos]._qtdPaginas >= 1){ //trocando as paginas do elemento que vai sair pelo que vai entrar na memoria
 							removeProcessFromRAM(ini+(10-posRam[pos]._qtdPaginas));
-							setProcessInRAM(sortData[procIn]._processNumber, ini+(10-posRam[pos]._qtdPaginas));
+							setProcessInRAM(ini+(10-posRam[pos]._qtdPaginas),sortData[procIn]._processNumber);
 							posRam[pos]._qtdPaginas--;
 						}else{
 							flagEnd=1;
@@ -362,7 +372,7 @@
 					}
 				}	
 			}
-			if(currentProcess>0 && sortData[currentProcess]._memoria==-1 && freeMemory>0){
+			if(currentProcess>=0 && sortData[currentProcess]._memoria==-1 && freeMemory>0){
 				putMemoryWIthFreeSpace(currentProcess, actualTime); //inserindo direto na ram para executar
 			}
 		}
@@ -392,7 +402,7 @@
 			takeNextFreeSpaceInMemory();
 			var ini=nextFreePositionR*10+1;
 			sortData[proc]._memoria=nextFreePositionR;
-			posRam[nextFreePositionR]._proc = sortData[proc]._processNumber;
+			posRam[nextFreePositionR]._proc = proc;
 			freeMemory--;
 			for(let i=0; i<10; i++){
 				setProcessInRAM(ini+i, sortData[proc]._processNumber);
@@ -405,7 +415,7 @@
 			takeNextFreeSpaceInMemory();
 			var ini=nextFreePositionH*10+1;
 			sortData[proc]._hd=nextFreePositionH;
-			posHd[nextFreePositionH]._proc = sortData[proc]._processNumber;
+			posHd[nextFreePositionH]._proc = proc;
 			freeHd--;
 			for(let i=0; i<10; i++){
 				setProcessInHD(ini+i, sortData[proc]._processNumber);
@@ -436,7 +446,7 @@
 				sortData[proc]._hd=nextFreePositionH;
 				var ini = nextFreePositionH*10+1;
 				freeHd--;
-				posHd[nextFreePositionH]._proc = sortData[proc]._processNumber;
+				posHd[nextFreePositionH]._proc = proc;
 				for(let i=0; i<10; i++){
 					setProcessInHD(ini+i, sortData[proc]._processNumber);
 				}
@@ -444,7 +454,7 @@
 			sortData[proc]._rr=actualTime;
 			ini=nextFreePositionR*10+1;
 			sortData[proc]._memoria=nextFreePositionR;
-			posRam[nextFreePositionR]._proc = sortData[proc]._processNumber;
+			posRam[nextFreePositionR]._proc = proc;
 			freeMemory--;
 			for(let i=0; i<10; i++){
 				setProcessInRAM(ini+i, sortData[proc]._processNumber);
@@ -459,20 +469,20 @@
 			var menorTem=10000000000; 
 			for(let i=0; i<sortData.length; i++) {
 				if(sortData[i]._start <= actualTime && sortData[i]._makingIO==0 && sortData[i]._timeLeft>0 && sortData[i]._rr < menorTem){
-					actualP=i;
-					menorTem=sortData[i]._rr;
+					if(sortData[i]._memoria==-1 && freeMemory>0){ //a ram ainda tem espaco e o processo nao esta na memoria
+						menorTem = sortData[i]._rr;	
+						actualP = i;
+					}else if(sortData[i]._memoria==-1){
+						sortData[i]._makingIO=1;
+						processWaitChange(i);
+					}else{
+						menorTem = sortData[i]._rr;
+						actualP = i;
+					}
 				}
 			}
 			if(actualP!=-1){
-				if(sortData[actualP]._memoria!=-1){
-					currentProcess=actualP;	
-				}else if(sortData[actualP]._memoria==-1 && freeMemory>0){
-					putMemoryWIthFreeSpace(actualP, actualTime);
-					currentProcess=actualP;
-				}else{
-					processWaitChange(actualP);
-				}
-				
+				currentProcess=actualP;
 			}
 		}
 
@@ -547,7 +557,7 @@
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
 					lastPosition++;
 					if(data["algorithm"]=="LRU"){
-						pushElementNowInRAM(sortData[currentProcess]._processNumber,  sortData[currentProcess]._memoria, lastPosition);
+						pushElementNowInRAM(currentProcess,  sortData[currentProcess]._memoria, lastPosition);
 					}
 					pageChanges(lastPosition);
 					putOtherProcess(lastPosition); //verificar se algum processo chegou a fila de prontos enquanto um esta executando na cpu
@@ -583,7 +593,7 @@
 					makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
 					lastPosition++;
 					if(data["algorithm"]=="LRU"){
-						pushElementNowInRAM(sortData[currentProcess]._processNumber,  sortData[currentProcess]._memoria, lastPosition);
+						pushElementNowInRAM(currentProcess,  sortData[currentProcess]._memoria, lastPosition);
 					}
 					pageChanges(lastPosition);
 					putOtherProcess(lastPosition);
@@ -632,16 +642,16 @@
 					lastPosition++;
 					//paginas
 					if(data["algorithm"]=="LRU"){
-						pushElementNowInRAM(sortData[currentProcess]._processNumber,  sortData[currentProcess]._memoria, lastPosition);
+						pushElementNowInRAM(currentProcess,  sortData[currentProcess]._memoria, lastPosition);
 					}
 					pageChanges(lastPosition);
 					putOtherProcess(lastPosition);
 				}
-				sortData[currentProcess]._exe=0;
 				sortData[currentProcess]._rr=lastPosition;
 				if(endOneProcess == 1){
 					finhishedProcess++;
 					sortData[currentProcess]._endTime = lastPosition;
+					sortData[currentProcess]._exe=0;
 					remJustHD(currentProcess);
 					remJustRAM(currentProcess);
 					remJustPagesTable(sortData[currentProcess]._processNumber);
@@ -653,6 +663,7 @@
 						pageChanges(lastPosition);
 						putOtherProcess(lastPosition);
 					}
+					sortData[currentProcess]._exe=0;
 					sortData[currentProcess]._rr=lastPosition;
 				}
 			}
@@ -700,7 +711,7 @@
 					lastPosition++;
 					//paginas
 					if(data["algorithm"]=="LRU"){
-						pushElementNowInRAM(sortData[currentProcess]._processNumber,  sortData[currentProcess]._memoria, lastPosition);
+						pushElementNowInRAM(currentProcess,  sortData[currentProcess]._memoria, lastPosition);
 					}
 					pageChanges(lastPosition);
 					putOtherProcess(lastPosition);
