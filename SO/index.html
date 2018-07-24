@@ -337,7 +337,7 @@
 						pageMemoryTime[pos]._time=actualTime;
 						waitListForIO.shift();
 					}
-					alterPagesTable(procOut);
+					alterPagesTable(sortData[procOut]._processNumber);
 					putInPagesTable(ini, procIn);
 				}
 			}
@@ -608,6 +608,78 @@
 				i++;
 			}            
 		}
+
+		 function roundRobinThatDoestDealWithMemory() {
+            var lastPosition = 0;
+            var spinning = [];
+            var count = 0;
+            var countLastPos = 0;
+            var currentProcess;
+            var timeForExecution;
+            var nextIsOver;
+            var rrIsOver = false;
+            var spinningIsOver = false;
+            
+            while(!rrIsOver){
+                
+                if(lastPosition < sortData[count]._start) {
+					lastPosition = sortData[count]._start;
+				}
+                for (;count < sortData.length; count++) {
+                    if (sortData[count]._start <= lastPosition) {
+                        spinning.push(count);
+                    }else{
+                        break;
+                    }
+                }
+                    
+                spinningIsOver = false;
+                while (!spinningIsOver){
+                    if (spinning.length <= 0){ break; }
+                    currentProcess = spinning.shift();
+                    if(sortData[currentProcess]._timeLeft <= data["quantum"]) {
+                        timeForExecution = sortData[currentProcess]._timeLeft;
+                        nextIsOver = true;
+                    }else{
+                        timeForExecution = data["quantum"];
+                        nextIsOver = false;
+                    }
+                    sortData[currentProcess]._timeLeft -= timeForExecution;
+                    for(let j = 0; j < timeForExecution; j++) {
+                        makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition);
+                        lastPosition++;
+                    }
+                    if(nextIsOver) {
+                        sortData[currentProcess]._endTime = lastPosition;
+                        for (;count < sortData.length; count++) {
+                            if (sortData[count]._start <= lastPosition) {
+                                spinning.push(count);
+                            }else{
+                                break;
+                            }
+                        }
+                        if (spinning.length <= 0){
+                            spinningIsOver = true;
+                        }
+                    }else {
+                        for(let j = 0; j < data["overload"]; j++) {
+                            makeProgressInGanttSquare(sortData[currentProcess]._processNumber, lastPosition, red);
+                            lastPosition++;
+                        }
+                        for (; count < sortData.length; count++) {
+                            if (sortData[count]._start <= lastPosition) {
+                                spinning.push(count);
+                            }else{
+                                break;
+                            }
+                        }
+                        spinning.push(currentProcess);
+                    }
+                }
+                
+                if (count >= sortData.length) { rrIsOver = true; }
+            }
+        }
         
         function roundRobin() {
            var lastPosition = 0;
@@ -746,7 +818,7 @@
 			        sjf();
 			        break;
 			    case "RR":
-			        roundRobin();
+			        roundRobinThatDoestDealWithMemory();
 			        break;
 			    case "EDF":
 			        edf();
