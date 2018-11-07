@@ -44,7 +44,7 @@
 <pre>
 <code>
 /**
- * Lida com a comunicação com banco de dados
+ * Lida com a conexão com banco de dados
  * @author autor
  */
 public class Connection {
@@ -55,7 +55,7 @@ public class Connection {
 						</div>
 					</section>
 					<section>
-						<div>Comentários curtos podem ser feitos na mesma linha do código e comentários curtos seguidos devem ser alinhados</div>
+						<div>Comentários curtos podem ser feitos na mesma linha, mas comentários seguidos devem ser alinhados</div>
 						<div>
 <pre>
 <code>
@@ -91,7 +91,7 @@ if(a == 2) {
 <code>
 package componente;
 
-import java.awt.*;                     /*Errado*/
+import java.awt.*;                     /*Evitar*/
 import javax.swing.*;
 
 import java.awt.event.ActionEvent;     /*Certo*/
@@ -141,12 +141,12 @@ if(a == b) {
 						<div>
 <pre>
 <code>
-if(a == b)      /*Errado*/
+if(a == b)      /*Evitar*/
 {
 	
 }
 
-if(a == b) {    /*Correto*/
+if(a == b) {    /*Melhor*/
 
 	
 }
@@ -155,7 +155,7 @@ if(a == b) {    /*Correto*/
 						</div>
 					</section>
 					<section>
-						<div>Evitar linhas de código com muitos caracteres (não mais que 70)</div>
+						<div>Evitar linhas de código com muitos caracteres (70)</div>
 						<div>Quebrar em pontos específicos</div>
 						<div>
 <pre>
@@ -175,9 +175,9 @@ longName1 = longName2 * (longName3 + longName4
 						<div>
 <pre>
 <code>
-var2= var1+4 ;     /*Errado*/
+var2= var1+4 ;     /*Evitar*/
 
-var2 = var1 + 4;   /*Correto*/
+var2 = var1 + 4;   /*Melhor*/
 </code>
 </pre>
 						</div>
@@ -190,11 +190,11 @@ var2 = var1 + 4;   /*Correto*/
 						<div>
 <pre>
 <code>
-int var1;             /*Errado*/
+int var1;             /*Evitar*/
 int var2;
 int var3;     
 
-int var1, va2, va3;   /*Correto*/
+int var1, va2, va3;   /*Melhor*/
 </code>
 </pre>
 						</div>
@@ -248,7 +248,7 @@ public final int MIN_VALUE;
 						</div>
 					</section>
 					<section>
-						<div>Pacotes devem seguir o modelo br.com.nome_da_empresa.nome_do_pacote</div>
+						<div>Pacotes devem seguir o modelo com.nome_da_empresa.nome_do_pacote</div>
 						<div>
 <pre>
 <code>
