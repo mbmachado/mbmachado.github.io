@@ -8,7 +8,7 @@ document.getElementById('external-link').addEventListener('click', (ev) => {
   ga('create', 'UA-208804201-1', 'mbmachado.github.io', 'gaTracker' );
   ga('gaTracker.send', 'event', 'Whatsapp', 'Botao', 'Rodape', url, {
     'transport': 'beacon',
-    'hitCallback': function(){ 
+    'hitCallback': function() { 
       window.open(url, '_blank');
     }
   });
