@@ -1,0 +1,115 @@
+body {
+    background-color: #dcd6c9;
+    font-family: 'Times New Roman', Times, serif;
+}
+button {
+    cursor: pointer;
+    box-shadow: 3px 3px #555555;
+}
+h1, h2, button {
+    text-transform: uppercase;
+}
+img {
+    height: 300px;
+    mix-blend-mode: multiply;
+}
+
+
+.wrapper {
+    min-height: 600px;
+    max-width: 1600px;
+    gap: 20px;
+}
+.display {
+    background-color: #d1d1d1;
+    border: solid 1px #333;
+    width: 55%;
+}
+.numbers {
+    gap: 5px;
+    font-size: 25px;
+}
+.number {
+    border: solid 1px black;
+    width: 50px;
+    height: 60px;
+}
+.keyboard {
+    background-color: #42393a;
+}
+.voting {
+    flex-wrap: wrap;
+    max-width: 400px;
+    gap: 15px;
+}
+.voting button {
+    font-size: 25px;
+}
+.actions {
+    flex-wrap: wrap;
+    margin-top: 50px;
+    gap: 10px;
+}
+.flex {
+    display: flex;
+}
+.block {
+    display: block;
+}
+.hidden {
+    display: none;
+}
+.flex-col {
+    flex-direction: column;
+}
+.flex-auto {
+    flex: 1;
+}
+.w-full {
+    width: 100%;
+}
+.w-100 {
+    width: 100px;
+}
+.p-10 {
+    padding: 10px;
+}
+.p-15 {
+    padding: 15px;
+}
+.p-20 {
+    padding: 20px;
+}
+.text-center {
+    text-align: center;
+}
+.mx-auto {
+    margin: 0 auto;
+}
+.bg-orange {
+    background-color: #ff8943;
+}
+.bg-white {
+    background-color: #fff;
+}
+.bg-black {
+    background-color: #000;
+}
+.bg-green {
+    background-color: green;
+}
+.text-white {
+    color: #fff;
+}
+.justify-center {
+    justify-content: center;
+}
+.items-center {
+    align-items: center;
+}
+
+
+#urn--div--the-end-screen {
+    font-size: 200px;
+    padding: 37px 0;
+}
